@@ -17,6 +17,5 @@ def hello(name, id):                                           #this code runs w
 def get_req():
     return 'You can only get this webpage.'
 
-
-if __name__ == "__main__":  #if running from command line, turn on dev mode
-    app.run(debug=True)     #dev mode, server updates on own, shows errors
+if __name__ == "__main__":      #if running from command line, turn on dev mode
+    app.run(debug=True)         #dev mode, server updates on own, shows errors
