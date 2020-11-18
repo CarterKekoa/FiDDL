@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block head %}                    <!--References blocks in base.html and will inherit the rest of the file-->
+<title>Register</title>
+{% endblock %}
+
+{% block body %} 
+    <h1>Register</h1>
+    <form action="/register" method="post">
+        <input type="text" name="email" id="email" maxlength="40">
+        <button type="submit">submit</button>
+    </form>
+    {% for l in t %}
+        {{l}}
+    {% endfor %}
+    
+
+{% endblock %}
