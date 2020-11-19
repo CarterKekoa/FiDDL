@@ -7,21 +7,12 @@ import pyrebase
 app = Flask(__name__)                        #call flask constuctor from object #__name__ references this file
 
 # Google Firebase ////////////////////////////////__________________________________________________
-firebaseConfig = {
-    'apiKey': "AIzaSyBI068aAZtlskhzAAAyJJ_eTB88jiy_auQ",
-    'authDomain': "fiddl-dev.firebaseapp.com",
-    'databaseURL': "https://fiddl-dev.firebaseio.com",
-    'projectId': "fiddl-dev",
-    'storageBucket': "fiddl-dev.appspot.com",
-    'messagingSenderId': "792330223312",
-    'appId': "1:792330223312:web:74d186ef299b8cb88628d5",
-    'measurementId': "G-M3D4L2WYTQ"
-}
+
 
 #initialize database
-firebase = pyrebase.initialize_app(firebaseConfig)
+firebase = pyrebase.initialize_app(json.load(open('firebase/firebaseConfig.json')))
 auth = firebase.auth()
-db = firebase.database()                  
+db = firebase.database()
 
 #Dummy data to see how to send it to html, make using dictionaires
 all_posts = [
@@ -36,6 +27,9 @@ all_posts = [
     }
 ]
 
+#Dummy Data to set up Google auth
+users1 = [{'uid': 1, 'name': 'Carter Mooring'}]
+
 #pushing dummy data to firebase
 # db.child("posts").push(all_posts)
 # db.child("posts").update(all_posts)
@@ -45,8 +39,11 @@ all_posts = [
 # Routes ////////////////////////////////////////____________________________________________
 #DEVELOPMENT
 
-#define url with a route
-@app.route('/')                                                #@ is a decorator, flask uses this to define its urls
+@app.route('/api/userinfo')
+def userinfo():
+    return {'data': users1}, 200
+
+@app.route('/')                                                #@ is a decorator, flask uses this to define its urls, define url with a route
 def welcome():
     return render_template('welcome.html')                       #must be in directory (folder) names templates, grabs file form there
 
@@ -54,7 +51,10 @@ def welcome():
 def register():
     if request.method == 'POST':
         email = request.form['email']
-        db.child("todo").push(email)
+        password = request.form['password']
+        user = auth.create_user_with_email_and_password(email, password)
+        auth.get_account_info(user['idToken'])
+        db.child("todo").push(user)
         todo = db.child("todo").get()
         to = todo.val()
         return render_template('register.html', t=to.values())
