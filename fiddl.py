@@ -1,7 +1,8 @@
 #run with 'python app.py'   can view on 'localhost:5000'
 
 from flask import Flask, render_template, json
-from flask.globals import request     #import flask libries, render_template is so we can make front end
+from flask.globals import request
+from jws import verify     #import flask libries, render_template is so we can make front end
 import pyrebase
 
 app = Flask(__name__)                        #call flask constuctor from object #__name__ references this file
@@ -49,19 +50,51 @@ def welcome():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    badEmail = 'There is already an account with this email address'
+    goodEmail = 'Good email submitted'
+    badPassMatch = 'Your passwords do not match. Please try again.'
+    created = 'User account successfully created'
     if request.method == 'POST':
         email = request.form['email']
+        try:
+            app.logger.info(goodEmail)
+        except:
+            app.logger.info(badEmail)                           #Email already exists, code 400
+            render_template('register.html', b=badEmail)
         password = request.form['password']
+        passwordCheck = request.form['passwordConfirm']         #Confirm Password
+        if password != passwordCheck:
+            app.logger.info(badPassMatch)
+            return render_template('register.html', bpm=badPassMatch)
         user = auth.create_user_with_email_and_password(email, password)
+        app.logger.info(created)
+        auth.send_email_verification(user['idToken'])           #send a user confirmation email
+        verify = 'An email has been sent to' + email + ". Please verify your account before logging in."
         auth.get_account_info(user['idToken'])
         db.child("todo").push(user)
         todo = db.child("todo").get()
         to = todo.val()
-        return render_template('register.html', t=to.values())
+        #TODO: have it actually switch to the login screen and url. Must login again. wont login without being verified.
+        return render_template('login.html', verify)
     return render_template('register.html')
 
-@app.route('/login')
+@app.route('/login', methods=['GET', 'POST'])
 def login():
+    unsuccesful = 'Please check your email or password'
+    succesful = 'Login Successful'
+    if request.method == 'POST':
+        email = request.form['email']
+        #TODO: verify if user has verified their account 
+        password = request.form['password']
+        #TODO: stay logged in button?
+        try:
+            auth.sign_in_with_email_and_password(email, password)
+            app.logger.info(succesful)
+            #TODO: move to next screen
+            return render_template('login.html', s=succesful)
+        except:
+            app.logger.info('Login Failed: ' + unsuccesful)
+            return render_template('login.html', us=unsuccesful)
     return render_template('login.html')
 
 #PRACTICE
