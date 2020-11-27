@@ -31,6 +31,7 @@ requests==2.11.1
 requests-toolbelt==0.7.0
 robotframework==3.2.2
 rsa==4.6
+simpleaudio==1.0.4
 six==1.15.0
 toml==0.10.1
 urllib3==1.26.2
