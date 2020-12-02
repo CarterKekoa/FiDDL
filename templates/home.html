@@ -5,6 +5,16 @@
 {% endblock %}
 
 {% block body %} 
-<h1>Home</h1>
+<div class="container">
+    <h1>Home</h1>
+    <form class="form-addPhoto" action="/upload-image" method="POST">
+        <label for="addNewPhoto">Add new photo</label>
+        <input type="submit" name="newPhoto" value="addNewPhoto">
+    </form>
+
+    <!--make same thing I did for add photo, the form action is the url-->
+    <input type="submit" name="myHome" value="moveToMyHome">
+
+</div>
 
 {% endblock %}

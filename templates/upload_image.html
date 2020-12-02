@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block head %}                    <!--References blocks in base.html and will inherit the rest of the file-->
+<title>Photo Upload</title>
+{% endblock %}
+
+{% block body %} 
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <h1>Upload Image</h1>
+
+                <form action="/upload-image" method="POST" enctype="multipart/form-data">
+                    <!--File browser-->
+                    <div class="form-group">
+                        <label>Select Image</label>
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" name="image" id="image">
+                            <label class="custom-file-label" for="image">Select Image...</label>
+
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Upload Image</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
