@@ -235,9 +235,9 @@ def home():
         data = db.child("users").child(USER["uid"]).child("photos").get().val()         #opens users in db, then finds person by  uid in db
 
         #Parse the returned OrderedDict for filenames of user photos
-        for val in data.values():
-            print(val)
-            storage.child("images/" + userId + "/" + val).download("images/" + userId + "/" + val, val)
+        #for val in data.values():
+        #    print(val)
+        #    storage.child("images/" + userId + "/" + val).download("images/" + userId + "/" + val, val)
         #TODO: print user photos to home screen
         
 
