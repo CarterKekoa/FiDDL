@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    {% block head %} {% endblock %}<!--This is called Jinga? allows code and blocks to be made elsewhere-->
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">     <!-- add main.css to base.html so applied to every page-->
+    {% block head %} {% endblock %}     <!--This is called Jinga? allows code and blocks to be made elsewhere-->
 </head>
 <body>
     {% block body %} {% endblock %}
