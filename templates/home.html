@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block head %} <!--References blocks in base.html and will inherit the rest of the file-->
+    <title>Home</title>
+{% endblock %}
+
+{% block body %} 
+    <form action="/logout" method="POST">
+        <label>Nav Bar</label>
+        <button type="submit" name="button" value="logoutButton">Logout</button>
+    </form>
+
+    <div class="container">
+        <h1>Home</h1>
+        <p>Welcome, {{firstName}}</p>
+        <form class="form-addPhoto" action="/upload-image" method="POST">
+            <label for="addNewPhoto">Add new photo</label>
+            <input type="submit" name="button" value="addNewPhoto">
+        </form>
+
+        <!--make same thing I did for add photo, the form action is the url-->
+        <input type="submit" name="myHome" value="moveToMyHome">
+    </div>
+
+    <div>
+        {% for urls in images %}
+            {{urls}}
+            <img src={{urls}}>
+        {% endfor %}
+    </div>
+
+{% endblock %}

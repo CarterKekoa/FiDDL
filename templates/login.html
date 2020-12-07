@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block head %}                    <!--References blocks in base.html and will inherit the rest of the file-->
+<title>Login</title>
+{% endblock %}
+
+{% block body %} 
+    <form action="/register" method="post">
+        <label>Nav Bar</label>
+        <button class="nav-bar register" type="submit" name="button" value="registerScreen">Register</button>
+    </form>
+    <div class="container">
+    
+    {% with messages = get_flashed_messages() %}
+        <!--Check if there are any messages-->
+        {% if messages %}
+            <!--Loop through the messages-->
+            {% for msg in messages %}
+                <p style="background-color:burlywood;">{{msg}}</p>
+            {% endfor%}
+        {% endif %}
+    {% endwith %}
+
+    <h1>Login</h1>
+
+    <form class="form-signin" action="/login" method="POST">
+        <h2>Please Sign In</h2>
+        <label for="inputEmail">Email Address</label>
+        <input type="email" id="inputEmail" name="email" class="form-control" maxlength="40" placeholder="Email address" required autofocus>
+        <label for="inputPassword">Password</label>
+        <input type="password" id="inputPassword" name="password" class="form-control" maxlength="40" placeholder="Password" required>
+        <div class="checkbox">
+            <label>
+                <input type="checkbox" value="remember-me">Remember me
+            </label>
+        </div>
+        <button class="btn btn-lg btn-primary btn-block" type="submit" name="button" value="login">submit</button>
+    </form>
+
+    </div>
+{% endblock %}
