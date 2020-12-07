@@ -1,8 +1,9 @@
 #run with 'python app.py'   can view on 'localhost:5000'
 
 import re
-from flask import Flask, render_template, json, request, redirect, url_for, session, send_from_directory
+from flask import Flask, render_template, json, request, redirect, url_for, session, send_from_directory, flash
 from flask.globals import request
+from flask.templating import render_template_string
 from jws import verify                                                  #import flask libries, render_template is so we can make front end
 import pyrebase
 from collections import OrderedDict
@@ -13,25 +14,24 @@ from werkzeug.utils import secure_filename                               #takes 
 
 app = Flask(__name__)                                                    #call flask constuctor from object #__name__ references this file
 
-# Google Firebase ////////////////////////////////__________________________________________________
-#initialize database
+
+
+#Initializations  ////////////////////////////////__________________________________________________
 firebase = pyrebase.initialize_app(json.load(open('firebase/firebaseConfig.json')))
 auth = firebase.auth()
 db = firebase.database()                                    
-#storageRef = firebase.storage.ref()                                #Points to the root reference
 app.secret_key = os.urandom(24)                                     #random secret key to track if user is logged in
-#storage = firebase.storage("gs://fiddl-dev.appspot.com")      # Get a reference to the storage service, which is used to create references in your storage bucket
 storage = firebase.storage()
 
 # Initialize USER as a global dictionary
 USER = {
-    "is_logged_in": False,
     "firstName": "",
     "lastName": "",
     "email": "",
     "uid": "",
     "photos": []
     }
+
 
 
 # Functions ////////////////////////////////////////____________________________________________
@@ -61,222 +61,302 @@ def email_verified_check():
     return False
 
 
+
 # Routes ////////////////////////////////////////____________________________________________
-# Welcome Page
-@app.route('/')                                                #@ is a decorator, flask uses this to define its urls, define url with a route
+# Welcome Page ---------------------------------
+@app.route('/', methods=['GET', 'POST'])                                                #@ is a decorator, flask uses this to define its urls, define url with a route
 def welcome():
+    #Check if screen buttons are clicked
+    if request.method == "POST":
+        if request.form['button'] == 'loginScreen':
+            redirect(url_for('/login'))
+        elif request.form['button'] == 'registerScreen':
+            redirect(url_for('/register'))
+
     return render_template('welcome.html')                       #must be in directory (folder) names templates, grabs file form there
 
-# Registration Page
+
+# Registration Page ---------------------------------
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    #TODO: add user logged in check
-    #Template Rendered
-    render_template('register.html')
+    try:
+        print("1.0")
+        #Check if a user is already logged in
+        print(session['usr'])                                    #simple test to see if a user is already logged in, if yes go to home page
+        app.logger.info("A user is already logged in")
+        return redirect(url_for('home'))                         #Send to home page if user is logged in
+    except KeyError:
+        render_template('register.html')
 
-    # Alert Messages
-    badEmail = 'There is already an account with this email address'
-    goodEmail = 'Good email submitted'
-    badPassMatch = 'Your passwords do not match. Please try again.'
-    created = 'User account successfully created'
-    loggedIn = 'New User logged in to account'
-    dataAdded = 'New user data added to Firebase'
-    registerFail = 'Failed to register user'
-    userIn = 'User already logged in, rerouting.'
-    registerSuccess = 'Full registration successful'
+        # Alert Messages
+        badEmail = 'There is already an account with this email address (Register - Bad)'
+        goodEmail = 'Good email submitted (Register - Good)'
+        badPassMatch = 'Your passwords do not match. Please try again. (Register - Bad)'
+        created = 'User account successfully created (Register - Good)'
+        loggedIn = 'New User logged in to account (Register - Good)'
+        dataAdded = 'New user data added to Firebase (Register - Good)'
+        registerFail = 'Failed to register user (Register - Bad)'
+        userIn = 'User already logged in, rerouting. (Register - Good)'
+        registerSuccess = 'Full registration successful (Register - Good)'
+        loginPage = "Navigating to Login Page Instead (Register - Good)"
+    
+        # Check if Buttons are clicked
+        if request.method == 'POST':
+            if request.form['button'] == 'register':
+                #Register button clicked
+                firstName = request.form['firstName']
+                lastName = request.form['lastName']
+                #Valid email checks
+                try:
+                    email = request.form['email']                           #grab user input email
+                    app.logger.info(goodEmail)
+                except:
+                    app.logger.info(badEmail)
+                    redirect('register')                                    #Email already exists, code 400
+                
+                #Valid Password checks
+                password = request.form['password']
+                passwordCheck = request.form['passwordConfirm']             #Confirm Password
+                if password != passwordCheck:
+                    app.logger.info(badPassMatch)
+                    return redirect('register')
 
-    # If data is Posted <form class="form-register" method="post"> in register.html
-    if request.method == 'POST':
-        firstName = request.form['firstName']
-        lastName = request.form['lastName']
-        try:
-            email = request.form['email']                           #grab user input email
-            app.logger.info(goodEmail)
-        except:
-            app.logger.info(badEmail)
-            redirect('register')                                #Email already exists, code 400
-        
-        password = request.form['password']
-        passwordCheck = request.form['passwordConfirm']             #Confirm Password
-        if password != passwordCheck:
-            app.logger.info(badPassMatch)
-            return redirect('register')
-        
-        try:
-            #Create User
-            auth.create_user_with_email_and_password(email, password)           #this automatically hashes the password!
-            app.logger.info(created)
+                try:
+                    #Create User
+                    auth.create_user_with_email_and_password(email, password)           #this automatically hashes the password!
+                    app.logger.info(created)
 
-            #Verify User Email
-            # auth.send_email_verification(user['idToken'])           #send a user confirmation email
-            verify = 'An email has been sent to' + email + ". Please verify your account before logging in."
-            app.logger.info(verify)
-            #TODO: make them verify before this happens, same in login
+                    #Verify User Email
+                    # auth.send_email_verification(user['idToken'])                     #send a user confirmation email
+                    verify = 'An email has been sent to' + email + ". Please verify your account before logging in."
+                    app.logger.info(verify)
+                    #TODO: make them verify before this happens, same in login
 
-            #Log User In
-            user = auth.sign_in_with_email_and_password(email, password)
-            app.logger.info(loggedIn)
+                    #Log User In
+                    user = auth.sign_in_with_email_and_password(email, password)
+                    app.logger.info(loggedIn)
 
-            #Add Data to Global USER
-            global USER
-            USER["is_logged_in"] = True
-            USER["firstName"] = firstName
-            USER["lastName"] = lastName
-            USER["email"] = user["email"]
-            USER["uid"] = user["localId"]
-            
-            #Add data to realtime database
-            data = {
-                "firstName": firstName,
-                "lastName": lastName,
-                "email": email
-            }
-            db.child("users").child(USER["uid"]).push(data, user['idToken'])
-            app.logger.info(dataAdded)
+                    #Session pdate that a user is now logged in
+                    session['usr'] = user['idToken']
+                    print(session)
+                    print(session['usr'])
 
-            #Go to Home Page for New User
-            app.logger.info(registerSuccess)
-            return redirect(url_for('home'))                   #Redirect routes
-        except:
-            app.logger.info(registerFail)
-            return redirect(url_for('register'))
-    else:
-        if USER["is_logged_in"] == True:
-            app.logger.info(userIn)
-            return redirect(url_for('home'))
-        else:
-            app.logger.info(registerFail)
-            redirect(url_for('register'))   
+                    #Add Data to Global USER - For RTDB 
+                    global USER
+                    USER["firstName"] = firstName
+                    USER["lastName"] = lastName
+                    USER["email"] = user["email"]
+                    USER["uid"] = user["localId"]
+                    
+                    #Add data to realtime database
+                    data = {
+                        "firstName": firstName,
+                        "lastName": lastName,
+                        "email": email
+                    }
+                    db.child("users").child(USER["uid"]).push(data, user['idToken'])        #Push user data to RTDB
+                    app.logger.info(dataAdded)
+
+                    #Go to Home Page for New User
+                    app.logger.info(registerSuccess)
+                    return redirect(url_for('home'))                                        #Redirect routes
+                except:
+                    #Registration Fail
+                    app.logger.info(registerFail)
+                    return redirect(url_for('register'))
+            elif request.form['button'] == 'loginScreen':
+                #Switch to login screen
+                app.logger.info(loginPage)
+                return redirect(url_for('login'))
+            else:
+                return render_template('register.html')
+        elif request.method == 'GET':
+            return render_template('register.html')
+  
     return render_template('register.html')
 
-#Login Page
+
+#Login Page ---------------------------------
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    #Alert Messages
+    loginStart = "Login Process initial check began (Login - Good)"
+
+    app.logger.info(loginStart)
     try:
-        print(session['usr'])           #simple test to see if a user is already logged in, if yes go to home page
+        #User already logged in check
+        print(session['usr'])                                   #simple test to see if a user is already logged in, if yes go to home page
         app.logger.info("A user is already logged in")
-        #Template Rendered
-        return redirect(url_for('home'))
+        return redirect(url_for('home'))                        #Send to home page
     except KeyError:
         # Alert Messages
-        unsuccesful = 'Your email or password was incorrect'
-        succesful = 'Login Successful'
-        loginData = 'Login user data added to Global'
-        dataGrab = 'User data grabbed from Firebase'
-        loginSuccess = ' logged in, moving to home screen'
+        unsuccesful = 'Your email or password was incorrect (Login - Bad)'
+        succesful = 'Login Successful (Login - Good)'
+        loginData = 'Login user data added to Global (Login - Good)'
+        dataGrab = 'User data grabbed from Firebase (Login - Good)'
+        loginSuccess = ' logged in, moving to home screen (Login - Good)'
+        registerScreen = 'Navigating to Register Screen Instead (Login - Good)'
+        loginBegan = "Login checks started (Login - Good)"
+        sessionStarted = "Loged in user session started (Login - Good)"
         
-        # If data is posted <form class="form-signin" action="/login" method="post">
+        app.logger.info(loginBegan)
+
+        #Check if button is pressed
         if request.method == 'POST':
-            email = request.form['email']
-            password = request.form['password']
-            #TODO: stay logged in button?
-            try:
-                #Log user in with input credentails
-                user = auth.sign_in_with_email_and_password(email, password)
-                app.logger.info(succesful)
+            #Check which button
+            if request.form['button'] == 'login': 
+                #Login Button Pressed
+                email = request.form['email']
+                password = request.form['password']
+                #TODO: stay logged in button?
+                try:
+                    #Log user in with input credentails
+                    user = auth.sign_in_with_email_and_password(email, password)
+                    app.logger.info(succesful)
 
-                #TODO: verify if user has verified their account 
-                
+                    #TODO: verify if user has verified their email 
+                    
+                    #Update session that a user is now logged in
+                    session['usr'] = user['idToken']
+                    app.logger.info(sessionStarted)
 
-                #Update that a user is now logged in
-                session['usr'] = user['idToken']
-                app.logger.info(user['idToken'])
-                app.logger.info("next")
+                    #Add Data to Global USER to get data
+                    global USER
+                    USER["is_logged_in"] = True
+                    USER["email"] = user["email"]
+                    USER["uid"] = user["localId"]
+                    app.logger.info(loginData)
 
-                #Add Data to Global USER to get data
-                global USER
-                USER["is_logged_in"] = True
-                USER["email"] = user["email"]
-                USER["uid"] = user["localId"]
-                app.logger.info(user["localId"])
-                app.logger.info(loginData)
-                #app.logger.info(USER["uid"])
+                    #Grab users name
+                    data = db.child("users").child(USER["uid"]).get().val()         #opens users in db, then finds person by  uid in db
+                    app.logger.info(dataGrab)
 
-                #Grab users name
-                data = db.child("users").child(USER["uid"]).get().val()         #opens users in db, then finds person by  uid in db
-                app.logger.info(dataGrab)
-                app.logger.info(data)
+                    #Parse the returned OrderedDict of data
+                    for val in data.values():
+                        #Grab logining in users name from database. Not necessary here
+                        for k,v in val.items():
+                            app.logger.info("login k,v:" + k,v)
+                            if k == 'firstName':
+                                app.logger.info("login v")
+                                name = v
+                    app.logger.info("User logged in: " + name)
 
-                #Parse the returned OrderedDict of data
-                for val in data.values():
-                    for k,v in val.items():
-                        app.logger.info("login k,v:" + k,v)
-                        if k == 'firstName':
-                            app.logger.info("login v")
-                            name = v
-                app.logger.info("User logged in: " + name)
-                
-                print(auth.current_user)
+                    #Send user to Home screen
+                    app.logger.info(name + loginSuccess)
+                    return redirect(url_for('home'))
+                except:
+                    #Login Fail
+                    app.logger.info('Login Failed: ' + unsuccesful)
+                    return redirect(url_for('login'))
+            elif request.form['button'] == 'registerScreen':
+                #Switch to Register Screen
+                app.logger.info(registerScreen)
+                return redirect(url_for('register'))
 
-                #Move to Home screen
-                app.logger.info(name + loginSuccess)
-                return redirect(url_for('home'))
-            except:
-                app.logger.info('Login Failed: ' + unsuccesful)
-                return redirect(url_for('login'))
-        #else:
-            #if USER["is_logged_in"] == True:
-                #return redirect(url_for('home'))
-            #else:
-                #return redirect(url_for('login'))
+        elif request.method == 'GET':
+            return render_template('login.html') 
+            
     return render_template('login.html')
 
-# Home Page
+
+#Logout request ---------------------------------
+@app.route('/logout', methods=['GET', 'POST'])   
+def logout():
+    #Alert Messages - Dev
+    loggedOut = "User successfully logged out"
+    loggoutFail = "Failed to log user out"
+
+    #User Flash Alerts
+    logoutSuccess = "You have been succesfully logged out"
+    
+    try:
+        #Logout User
+        auth.current_user = None                        #Logout from firebase Auth
+        session.clear()                                 #Clear User Session
+        app.logger.info(loggedOut)
+        flash(logoutSuccess, "info")                    #"info" is the type of message for more customization if we want, others are warning, info, error
+    except KeyError:
+        app.logger.info(loggoutFail)
+    return redirect(url_for('login'))
+
+
+# Home Page ---------------------------------
 @app.route('/home', methods=["GET", "POST"])
 def home():
-    #TODO: YEEEESH
+    #Alert Messages
+    userLogedIn = "User is still logged in (Home - Good)."
+    userNotIn = "No user logged in (Home - Bad)."
+
     try:
+        #Check if user is logged in
         print(session['usr'])
-        app.logger.info("A user is already logged in")
+        app.logger.info(userLogedIn)
 
         userId = auth.current_user['localId']               #auth.current_user is how we get the current users data
 
         #Grab users name
+        user = db.child("users").child(USER["uid"]).get().val()
+        #Parse the returned OrderedDict of data
+        for val in user.values():
+            #Grab logining in users name from database. Not necessary here
+            for k,v in val.items():
+                print(k,v)
+                if k == 'firstName':
+                    name = v
+                    print(name)
+
+        images = []                                                                     #image url storage list
         data = db.child("users").child(USER["uid"]).child("photos").get().val()         #opens users in db, then finds person by  uid in db
-
         #Parse the returned OrderedDict for filenames of user photos
-        #for val in data.values():
-        #    print(val)
-        #    storage.child("images/" + userId + "/" + val).download("images/" + userId + "/" + val, val)
+        for val in data.values():
+            print(val)
+            #storage.child("images/" + userId + "/" + val).download(val, val)            #dowloads image to local folder, testing only
+            imageURL = storage.child("images/" + userId + "/" + val).get_url(None)
+            print(imageURL)
+            images.append(imageURL)
         #TODO: print user photos to home screen
+        print(images)
         
-
         if request.method == "POST":
-            #Checks which buttons are clicked, url returned is in the form for the buttons
-            if request.form['submit_button'] == 'addNewPhoto':
-                redirect(url_for('upload_image'))
-            elif request.form['submit_button'] == 'addNewPhoto':
+            #Check if button is clicked
+            if request.form['button'] == 'addNewPhoto':
+                #Add new photo button
+                return redirect(url_for('upload_image'))
+            elif request.form['button'] == 'updateMyHome':
                 #TODO: make this my home portion
                 render_template('/home')
-
+            elif request.form['button'] == 'logoutButton':
+                #Logout Button
+                return redirect(url_for('logout'))
             return render_template('home.html')
 
+        if request.method == "GET":
+            render_template('home.html')
+
     except KeyError:
-        app.logger.info("No user logged in, redirect to login")
+        app.logger.info(userNotIn)
         return redirect(url_for('login'))
     
-    
-    # How to update a existing data
-    #db.child("users").child("Morty").update({"name": "Mortiest Morty"})
-
-    # Removing existing data
-    #db.child("users").child("Morty").remove()
-    return render_template('home.html')
+    return render_template('home.html', firstName=name, images=images)
 
 
-
+# Upload Image ---------------------------------
 #temp image upload location
 #TODO: put these in a private config file
 app.config["IMAGE_UPLOAD"] = "photosTest"
 app.config["ALLOWED_IMAGE_EXTENSIONS"] = ["PNG", "JPG", "JPEG"]
 app.config["MAX_IMAGE_FILESIZE"] = 1.5 * 1024 * 1024    #1,572,864 Bytes or 1572.864 KB
 
-# Upload Image
+# Upload Image ---------------------------------
 @app.route('/upload-image', methods=["GET", "POST"])
 def upload_image():
+    # Alert Messages
+    userLogedIn = "User is still logged in (PhotoUpload - Good)."
+    userNotIn = "No user logged in (PhotoUpload - Bad)."
+
     try:
         print(session['usr'])                   #this is equal to logged in users id token->  user['idToken']
-        app.logger.info("A user is already logged in")
+        app.logger.info(userLogedIn)
         #TODO: add a logout button, make sure to delete session for use on logout
         #user = session['usr']
 
@@ -349,17 +429,21 @@ def upload_image():
                     #Add photo filename data to realtime database, for reference later
                     db.child("users").child(userId).child("photos").push(filename)
                     app.logger.info(dataAdded)
-                
                 return redirect(request.url)
+            elif request.form['button'] == 'logoutButton':
+                #Logout Button
+                return redirect(url_for('logout'))
+                
     except KeyError:
-        app.logger.info("No user logged in, redirect to login")
+        #No user logged in
+        app.logger.info(userNotIn)
         return redirect(url_for('login'))
     
     return render_template("upload_image.html")
 
 
 
-#PRACTICE
+#PRACTICE ---------------------------------
 @app.route('/api/userinfo')
 def userinfo():
     return {'data': users1}, 200

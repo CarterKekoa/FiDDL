@@ -5,6 +5,11 @@
 {% endblock %}
 
 {% block body %} 
+    <form action="/login" method="POST">
+        <label>Nav Bar</label>
+        <button class="nav-bar login" type="submit" name="button" value="loginScreen">Login</button>
+    </form>
+
     <div class="container">
         <h1>Register</h1>
 
@@ -20,7 +25,7 @@
             </div>
         {% endif%}
 
-        <form class="form-register" action="/register" method="post">
+        <form class="form-register" action="/register" method="POST">
             <h2>Please Create an Account</h2>
             <label for="inputFirstName">First Name</label>
             <input type="firstName" id="inputFirstName" name="firstName" class="form-control" maxlength="40" placeholder="First Name" required autofocus>
@@ -32,7 +37,7 @@
             <input type="password" id="inputPassword" name="password" class="form-control" maxlength="40" placeholder="Password" required>
             <label for="inputPassword">Confirm Password</label>
             <input type="password" id="inputPasswordConfirm" name="passwordConfirm" class="form-control" maxlength="40" placeholder="Confirm Password" required>    
-            <button class="btn btn-lg btn-primary btn-block" type="submit">submit</button>
+            <button class="btn btn-lg btn-primary btn-block" type="submit" name="button" value="register">submit</button>
         </form>
     </div>
 

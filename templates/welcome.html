@@ -5,6 +5,15 @@
 {% endblock %}
 
 {% block body %} 
+<div>
+    <label>Nav Bar</label>
+    <form action="/login">
+        <button class="nav-bar login" type="submit" name="button" value="loginScreen" method="POST">Login</button>
+    </form>
+    <form action="/register">
+        <button class="nav-bar register" type="submit" name="button" value="registerScreen" method="POST">Register</button>
+    </form>
+</div>
 <h1>Welcome To FIDDL</h1>
 <h2>What do we do?</h2>
 <p>FIDDL stands for Face ID D</p>
