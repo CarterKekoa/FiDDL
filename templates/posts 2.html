@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block head %}                    <!--References blocks in base.html and will inherit the rest of the file-->
+<title>Posts</title>
+{% endblock %}
+
+{% block body %} 
+    <h1>All Posts</h1>
+
+    {% for post in posts %}         <!-- Loop in jinga to loop through data-->
+        <h2>{{ post.title }}</h2>   <!-- Double brakets is like a print: DONT PUT BRACKETS IN COMMETNS it will break-->
+
+        {% if post.author %}        <!-- If statement -->
+            <h3>By: {{ post.author }}</h3>
+        {% else %}
+            <h3>By: Author Unknown</h3>
+        {% endif %}
+
+        <p>{{ post.content }}</p>   <!-- This data is being sent from fiddl.py-->
+    {% endfor %}
+
+{% endblock %}

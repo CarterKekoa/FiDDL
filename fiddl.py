@@ -1,4 +1,7 @@
 #run with 'python app.py'   can view on 'localhost:5000'
+class FacialRec():
+    def __init__(self):
+            self.images =[]
 
 import re
 from flask import Flask, render_template, json, request, redirect, url_for, session, send_from_directory, flash
@@ -11,6 +14,7 @@ import os
 import imghdr
 from pyrebase.pyrebase import Storage                                    #for images
 from werkzeug.utils import secure_filename                               #takes a file name and returns a secure version of it
+#import recognize
 
 app = Flask(__name__)                                                    #call flask constuctor from object #__name__ references this file
 
@@ -23,6 +27,7 @@ db = firebase.database()
 app.secret_key = os.urandom(24)                                     #random secret key to track if user is logged in
 storage = firebase.storage()
 
+
 # Initialize USER as a global dictionary
 USER = {
     "firstName": "",
@@ -31,7 +36,6 @@ USER = {
     "uid": "",
     "photos": []
     }
-
 
 
 # Functions ////////////////////////////////////////____________________________________________
@@ -80,7 +84,6 @@ def welcome():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     try:
-        print("1.0")
         #Check if a user is already logged in
         print(session['usr'])                                    #simple test to see if a user is already logged in, if yes go to home page
         app.logger.info("A user is already logged in")
@@ -286,6 +289,7 @@ def home():
     #Alert Messages
     userLogedIn = "User is still logged in (Home - Good)."
     userNotIn = "No user logged in (Home - Bad)."
+    noPhoDisplay = "User has no photos to display"
 
     try:
         #Check if user is logged in
@@ -305,17 +309,20 @@ def home():
                     name = v
                     print(name)
 
-        images = []                                                                     #image url storage list
-        data = db.child("users").child(USER["uid"]).child("photos").get().val()         #opens users in db, then finds person by  uid in db
-        #Parse the returned OrderedDict for filenames of user photos
-        for val in data.values():
-            print(val)
-            #storage.child("images/" + userId + "/" + val).download(val, val)            #dowloads image to local folder, testing only
-            imageURL = storage.child("images/" + userId + "/" + val).get_url(None)
-            print(imageURL)
-            images.append(imageURL)
-        #TODO: print user photos to home screen
-        print(images)
+        try:
+            images = []                                                                     #image url storage list
+            data = db.child("users").child(USER["uid"]).child("photos").get().val()         #opens users in db, then finds person by  uid in db
+            #Parse the returned OrderedDict for filenames of user photos
+            for val in data.values():
+                print(val)
+                #storage.child("images/" + userId + "/" + val).download(val, val)            #dowloads image to local folder, testing only
+                imageURL = storage.child("images/" + userId + "/" + val).get_url(None)
+                print(imageURL)
+                images.append(imageURL)
+            #TODO: print user photos to home screen
+            print(images)
+        except:
+            app.logger.info(noPhoDisplay)
         
         if request.method == "POST":
             #Check if button is clicked
@@ -328,6 +335,12 @@ def home():
             elif request.form['button'] == 'logoutButton':
                 #Logout Button
                 return redirect(url_for('logout'))
+            elif request.form['button'] == 'analyzePhoto':
+                #facial_rec = FacialRec()
+                #facial_rec.images = images
+                #print(facial_rec.images)
+                #TODO:
+                print("TODO")
             return render_template('home.html')
 
         if request.method == "GET":
@@ -344,6 +357,7 @@ def home():
 #temp image upload location
 #TODO: put these in a private config file
 app.config["IMAGE_UPLOAD"] = "photosTest"
+app.config["IMAGE_ANALYZE_UPLOAD"] = "photosTest/analyzePhotos"
 app.config["ALLOWED_IMAGE_EXTENSIONS"] = ["PNG", "JPG", "JPEG"]
 app.config["MAX_IMAGE_FILESIZE"] = 1.5 * 1024 * 1024    #1,572,864 Bytes or 1572.864 KB
 
@@ -413,27 +427,35 @@ def upload_image():
 
                     image.seek(0)                               #NEED THIS! We point to the end of the file above to find the size, this causes a empty file to upload without this fix
                     
-                    #Save photo to local directory, Testing only
-                    #image.save(os.path.join(app.config["IMAGE_UPLOAD"], filename))  #save images to /photosTest for testing
-                   
-                    #Save user photo to Google Storage
-                    storage.child("images/" + userId + "/" + filename).put(image, userIdToken)
-                    app.logger.info(dataAdded)
+                    app.logger.info("/////////////1.0///////////////")
+                    app.logger.info(request.form.get('analyzer'))
+                    #if request.form.get('analyzer') == 'on':
+                    app.logger.info("/////////////2.0///////////////")
+                        #Save photo to local directory, Testing only
+                    image.save(os.path.join(app.config["IMAGE_ANALYZE_UPLOAD"], filename))  #save images to /photosTest for testing
+                    print("YAY")
+                    #else:
+                    #    app.logger.info("/////////////3.0///////////////")
+                        #Save user photo to Google Storage
+                    #    storage.child("images/" + userId + "/" + filename).put(image, userIdToken)
+                    #    app.logger.info(dataAdded)
 
-                    
-                    #Add filename to Global USER
-                    global USER
-                    USER["photos"].append(filename)
-                    print(USER)
+                        
+                        #Add filename to Global USER
+                    #    global USER
+                     #   USER["photos"].append(filename)
+                    #    print(USER)
 
-                    #Add photo filename data to realtime database, for reference later
-                    db.child("users").child(userId).child("photos").push(filename)
-                    app.logger.info(dataAdded)
+                        #Add photo filename data to realtime database, for reference later
+                    #    db.child("users").child(userId).child("photos").push(filename)
+                     #   app.logger.info(dataAdded)
                 return redirect(request.url)
             elif request.form['button'] == 'logoutButton':
                 #Logout Button
                 return redirect(url_for('logout'))
-                
+            elif request.form['button'] == 'backHomeButton':
+                #Logout Button
+                return redirect(url_for('home'))
     except KeyError:
         #No user logged in
         app.logger.info(userNotIn)
