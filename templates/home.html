@@ -14,7 +14,7 @@
         <h1>Home</h1>
         <p>Welcome, {{firstName}}</p>
         <form class="form-addPhoto" action="/upload-image" method="POST">
-            <label for="addNewPhoto">Add new photo</label>
+            <label for="addNewPhoto">Add new photo:</label>
             <input type="submit" name="button" value="addNewPhoto">
         </form>
         <form action="/home" method="POST">
@@ -23,8 +23,14 @@
         </form>
 
         <!--make same thing I did for add photo, the form action is the url-->
+        <label for="moveToMyHome">Go to my home:</label>
         <input type="submit" name="myHome" value="moveToMyHome">
     </div>
+
+    <form action="/home" method="POST">
+        <label>Facial Recognition:</label>
+        <button type="submit" name="button" value="analyzePicture">Analyze</button>
+    </form>
 
     <div>
         {% for urls in images %}
