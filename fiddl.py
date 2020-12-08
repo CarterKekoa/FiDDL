@@ -10,7 +10,9 @@ from collections import OrderedDict
 import os
 import imghdr
 from pyrebase.pyrebase import Storage                                    #for images
-from werkzeug.utils import secure_filename                               #takes a file name and returns a secure version of it
+from werkzeug.utils import secure_filename
+import subprocess  
+import recognize
 
 app = Flask(__name__)                                                    #call flask constuctor from object #__name__ references this file
 
@@ -328,6 +330,8 @@ def home():
             elif request.form['button'] == 'logoutButton':
                 #Logout Button
                 return redirect(url_for('logout'))
+            #elif request.form['button'] == 'anaylzePicture':
+                #recognize.facialRecognition(fileName)
             return render_template('home.html')
 
         if request.method == "GET":
@@ -346,6 +350,7 @@ def home():
 app.config["IMAGE_UPLOAD"] = "photosTest"
 app.config["ALLOWED_IMAGE_EXTENSIONS"] = ["PNG", "JPG", "JPEG"]
 app.config["MAX_IMAGE_FILESIZE"] = 1.5 * 1024 * 1024    #1,572,864 Bytes or 1572.864 KB
+app.config["IMAGE_ANALYZE_UPLOAD"] = "photosTest/analyzePhotos"
 
 # Upload Image ---------------------------------
 @app.route('/upload-image', methods=["GET", "POST"])
@@ -412,7 +417,10 @@ def upload_image():
                     userIdToken = auth.current_user['idToken']
 
                     image.seek(0)                               #NEED THIS! We point to the end of the file above to find the size, this causes a empty file to upload without this fix
-                    
+                    image.save(os.path.join(app.config["IMAGE_ANALYZE_UPLOAD"], filename))
+                    recognize.facialRecognition("photosTest/analyzePhotos/kevin.jpg")
+
+                    """
                     #Save photo to local directory, Testing only
                     #image.save(os.path.join(app.config["IMAGE_UPLOAD"], filename))  #save images to /photosTest for testing
                    
@@ -428,7 +436,7 @@ def upload_image():
 
                     #Add photo filename data to realtime database, for reference later
                     db.child("users").child(userId).child("photos").push(filename)
-                    app.logger.info(dataAdded)
+                    app.logger.info(dataAdded)"""
                 return redirect(request.url)
             elif request.form['button'] == 'logoutButton':
                 #Logout Button
