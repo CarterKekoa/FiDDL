@@ -1,4 +1,4 @@
-#run with 'python app.py'   can view on 'localhost:5000'
+#run with 'python3 app.py'   can view on 'localhost:5000'
 class FacialRec():
     def __init__(self):
             self.images =[]
@@ -13,14 +13,9 @@ from collections import OrderedDict
 import os
 import imghdr
 from pyrebase.pyrebase import Storage                                    #for images
-<<<<<<< HEAD
 from werkzeug.utils import secure_filename                               #takes a file name and returns a secure version of it
-#import recognize
-=======
-from werkzeug.utils import secure_filename
-import subprocess  
+import subprocess
 import recognize
->>>>>>> 7868fd9b3941f9f97f768ccb3a347f0ec4f24e9b
 
 app = Flask(__name__)                                                    #call flask constuctor from object #__name__ references this file
 
@@ -327,6 +322,7 @@ def home():
                 images.append(imageURL)
             #TODO: print user photos to home screen
             print(images)
+            return render_template('home.html', firstName=name, images=images)
         except:
             app.logger.info(noPhoDisplay)
         
@@ -356,7 +352,7 @@ def home():
         app.logger.info(userNotIn)
         return redirect(url_for('login'))
     
-    return render_template('home.html', firstName=name, images=images)
+    return render_template('home.html')
 
 
 # Upload Image ---------------------------------
@@ -433,26 +429,33 @@ def upload_image():
                     userIdToken = auth.current_user['idToken']
 
                     image.seek(0)                               #NEED THIS! We point to the end of the file above to find the size, this causes a empty file to upload without this fix
-                    image.save(os.path.join(app.config["IMAGE_ANALYZE_UPLOAD"], filename))
-                    recognize.facialRecognition("photosTest/analyzePhotos/kevin.jpg")
-
-                    """
-                    #Save photo to local directory, Testing only
-                    #image.save(os.path.join(app.config["IMAGE_UPLOAD"], filename))  #save images to /photosTest for testing
-                   
-                    #Save user photo to Google Storage
-                    storage.child("images/" + userId + "/" + filename).put(image, userIdToken)
-                    app.logger.info(dataAdded)
-
                     
-                    #Add filename to Global USER
-                    global USER
-                    USER["photos"].append(filename)
-                    print(USER)
+                    #Check if to run FR or Store photo
+                    if request.form.get('analyzer') == 'analyze':
+                        #Analyze Check box checked. Run FR on uploaded image then
+                        image.save(os.path.join(app.config["IMAGE_ANALYZE_UPLOAD"], filename))
+                        anazlyzeInfo = recognize.facialRecognition("photosTest/analyzePhotos/" + filename)
+                        print(anazlyzeInfo)
+                        nameDetermined = anazlyzeInfo[0]
+                        proba = anazlyzeInfo[1]
+                        return render_template("upload_image.html", name=nameDetermined, proba=proba)
+                    else:
+                        #Images being uploaded to db instead
+                        #Save photo to local directory, Testing only
+                        #image.save(os.path.join(app.config["IMAGE_UPLOAD"], filename))  #save images to /photosTest for testing
+                    
+                        #Save user photo to Google Storage
+                        storage.child("images/" + userId + "/" + filename).put(image, userIdToken)
+                        app.logger.info(dataAdded)
 
-                    #Add photo filename data to realtime database, for reference later
-                    db.child("users").child(userId).child("photos").push(filename)
-                    app.logger.info(dataAdded)"""
+                        #Add filename to Global USER
+                        global USER
+                        USER["photos"].append(filename)
+                        print(USER)
+
+                        #Add photo filename data to realtime database, for reference later
+                        db.child("users").child(userId).child("photos").push(filename)
+                        app.logger.info(dataAdded)
                 return redirect(request.url)
             elif request.form['button'] == 'logoutButton':
                 #Logout Button
