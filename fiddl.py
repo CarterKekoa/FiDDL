@@ -309,6 +309,7 @@ def home():
                 if k == 'firstName':
                     name = v
                     print(name)
+        
 
         try:
             images = []                                                                     #image url storage list
@@ -324,7 +325,7 @@ def home():
             print(images)
             return render_template('home.html', firstName=name, images=images)
         except:
-            app.logger.info(noPhoDisplay)
+            render_template('home.html', firstName=name)
         
         if request.method == "POST":
             #Check if button is clicked
@@ -361,7 +362,7 @@ def home():
 app.config["IMAGE_UPLOAD"] = "photosTest"
 app.config["IMAGE_ANALYZE_UPLOAD"] = "photosTest/analyzePhotos"
 app.config["ALLOWED_IMAGE_EXTENSIONS"] = ["PNG", "JPG", "JPEG"]
-app.config["MAX_IMAGE_FILESIZE"] = 1.5 * 1024 * 1024    #1,572,864 Bytes or 1572.864 KB
+app.config["MAX_IMAGE_FILESIZE"] = 4 * 1024 * 1024    #1,572,864 Bytes or 1572.864 KB
 app.config["IMAGE_ANALYZE_UPLOAD"] = "photosTest/analyzePhotos"
 
 # Upload Image ---------------------------------

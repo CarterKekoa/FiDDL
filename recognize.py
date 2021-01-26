@@ -10,7 +10,7 @@ import numpy as np
 import argparse
 import imutils
 import pickle
-import cv2
+import cv2			#pip3 install opencv-python	#pip3 install scikit-learn==0.23.2
 import os
 
 

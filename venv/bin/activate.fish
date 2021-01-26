@@ -29,7 +29,7 @@ end
 # unset irrelevant variables
 deactivate nondestructive
 
-set -gx VIRTUAL_ENV "/Users/Cartermooring/Desktop/ClassesSpring2020/CPSC491 (Senior Design)/FIDDL/cpsc-491-2-senior-project-facial-recognition-security-lock/venv"
+set -gx VIRTUAL_ENV "/Users/Cartermooring/Desktop/ClassesSpring2021/CPSC491_(Senior_Design)/FIDDL/cpsc-491-2-senior-project-facial-recognition-security-lock/venv"
 
 set -gx _OLD_VIRTUAL_PATH $PATH
 set -gx PATH "$VIRTUAL_ENV/bin" $PATH
