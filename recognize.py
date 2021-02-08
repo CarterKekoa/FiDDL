@@ -99,7 +99,6 @@ def facialRecognition(imageName):
 	cv2.waitKey(0)
 
 ##################### Called from command line #####################
-
 if __name__ == "__main__":
 	print("10")
 	# construct the argument parser and parse the arguments
