@@ -12,23 +12,16 @@
 
     <div class="container">
         <h1>Home</h1>
-        <p>Welcome, {{firstName}}</p>
+        <h2>Welcome, {{firstName}}</h2>
         <form class="form-addPhoto" action="/upload-image" method="POST">
-            <label for="addNewPhoto">Add new photo:</label>
+            <label for="addNewPhoto">Move to add photos page:</label>
             <input type="submit" name="button" value="addNewPhoto">
         </form>
-
-        <!--make same thing I did for add photo, the form action is the url-->
-        <label for="moveToMyHome">Go to my home:</label>
-        <input type="submit" name="myHome" value="moveToMyHome">
     </div>
 
-    <form action="/home" method="POST">
-        <label>Facial Recognition:</label>
-        <button type="submit" name="button" value="analyzePicture">Analyze</button>
-    </form>
-
+    <div></div>
     <div>
+        <h2>Photos in {{firstName}}'s Database</h2>
         {% for urls in images %}
             {{urls}}
             <img src={{urls}}>

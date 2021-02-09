@@ -5,11 +5,12 @@
 #	--le output/le.pickle --image images/kevin.jpg
 
 # import the necessary packages
+from flask.templating import render_template
 import numpy as np
 import argparse
 import imutils
 import pickle
-import cv2
+import cv2			#pip3 install opencv-python	#pip3 install scikit-learn==0.23.2
 import os
 
 
@@ -31,7 +32,7 @@ def facialRecognition(imageName):
 
 	# load the image, resize it to have a width of 600 pixels (while
 	# maintaining the aspect ratio), and then grab the image dimensions
-	image = cv2.imread("photosTest/analyzePhotos/kevin.jpg")
+	image = cv2.imread(imageName)
 	image = imutils.resize(image, width=600)
 	(h, w) = image.shape[:2]
 
@@ -88,14 +89,18 @@ def facialRecognition(imageName):
 				(0, 0, 255), 2)
 			cv2.putText(image, text, (startX, y),
 				cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
-
+			
+			info = [name, (proba * 100)]
+			#TODO: image is an array here
+			#render_template("upload_image.html", i=image)
 	# show the output image
-	cv2.imshow("Image", image)
+	#cv2.imshow("Image", image)
+	return info
 	cv2.waitKey(0)
 
 ##################### Called from command line #####################
-
 if __name__ == "__main__":
+	print("10")
 	# construct the argument parser and parse the arguments
 	ap = argparse.ArgumentParser()
 	ap.add_argument("-i", "--image", required=True,
