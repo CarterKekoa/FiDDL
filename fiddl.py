@@ -487,7 +487,6 @@ def upload_image():
                         app.logger.info(dataAdded)
 
                         #Add filename to Global USER
-                        global USER
                         USER["photos"].append(filename)
                         print(USER)
 
