@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block head %}                    <!--References blocks in base.html and will inherit the rest of the file-->
+<title>Photo Upload</title>
+{% endblock %}
+
+{% block body %} 
+    <form action="/logout" method="POST">
+        <label>Nav Bar</label>
+        <button type="submit" name="button" value="logoutButton">Logout</button>
+    </form>
+    <form action="/home" method="POST">
+        <button type="submit" name="button" value="backHomeButton">Home</button>
+    </form>
+
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <h1>Upload Image</h1>
+
+                <form action="/upload-image" method="POST" enctype="multipart/form-data">
+                    <!--File browser-->
+                    <div>
+                        <p>Check this box is you would like to to run Facial Recognition on the photo you are going to upload.</p>
+                        <p>If left unchecked, images will be added to users Database instead.</p>
+                        <input type="checkbox" name="analyzer" value="analyze">Analyze New Photo</input>
+                        <p></p>
+                    </div>
+                        
+                    <div class="form-group">
+                        <h3>Select Image</h3>
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" name="image" id="image">
+                            <label class="custom-file-label" for="image" value="upload-image">Select Image to upload...</label>
+                        </div>
+                    </div>
+                    <div>
+                        <button type="submit" class="btn btn-primary">Upload Image</button>
+                        <label class="custom-file-label" for="image" value="upload-image">Upload Selected Image...</label>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <h2>Uploaded Image Analyzed Data:</h2>
+        <p>Data will only appear if checkbox above is checked. Data is based on the Facial Recognition results of the uploaded image compared to users already stored images.</p>
+        <div>
+            <h3>Name of person found in photo: </h3>
+            <p>{{name}}</p>
+        </div>
+        <div>
+            <h3>% Probablity (Accuracy Confidence): </h3>
+            <p>{{proba}}</p>
+        </div>
+        
+    </div>
+
+{% endblock %}
