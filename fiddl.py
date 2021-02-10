@@ -17,6 +17,7 @@ from werkzeug.utils import secure_filename                               #takes 
 import subprocess
 import recognize
 import extract_embeddings
+import train_model
 
 app = Flask(__name__)                                                    #call flask constuctor from object #__name__ references this file
 
@@ -70,28 +71,45 @@ def allowed_image_filesize(file_size):
 def email_verified_check():
     return False
 
-# Create a list of all photo URLs
-def all_photo_grab():
-    print("All Photos Start---------------------------------------")
-    print("storage: " + str(storage))
-    # TODO:
-    #ref = storage.child("images").child("65TP5SoqLCOGc8FyHAgeDHSoO422").listAll()
-    #print("ref: " + str(ref))
-    #for file in files:
-    #    print("child: " + str(storage.child(file.name).get_url(None)))
-    #images = []                                                                     #image url storage list
-    #data = db.child("users").child(USER["uid"]).child("photos").get().val()         #opens users in db, then finds person by  uid in db
-    # data has the id of each photo paired with the actual photo file name
-    # Parse the returned OrderedDict for filenames of user photos
-    #for val in data.values():
-        #print("val: " + str(val))               # val = file names of photos stored (from database aka dictionary)
-        #storage.child("images/" + userId + "/" + val).download(val, val)           # dowloads image to local folder, testing only
-     #   imageURL = storage.child("images/" + userId + "/" + val).get_url(None)      # URL for Google Storage Photo location
-        #print("imageURL: " + str(imageURL))
-    #    images.append(imageURL)                 # Stores the URL of each photo for the user
-    #USER["image_locations"] = images            # Stores the users URL list in Global variable. TODO: Make sure to delete this when session ends
-    #print(str(USER["image_locations"]))
-    print("All Photos End---------------------------------------")
+def all_users():
+    data = db.child("users").get().val()
+    print("Data: ")
+    print(data.values())
+
+    all_user_photo_locations = {}
+
+    #Parse the returned OrderedDict of data
+    for val in data:
+        #Grab logining in users name from database. Not necessary here
+        print("HERE 188888888888888888888888888888888888888888888888888888888888888888888888")  
+        print("val: " + str(val))
+        all_user_photo_locations[val] = []
+
+        #TODO: WHY is this line not working how it should!?
+        data2 = db.child("users").child(val).child("photos").get()
+        print("1: ", data2)
+        try:
+            data2 = data2.val()
+            print("5: ", data2)
+
+            # data has the id of each photo paired with the actual photo file name
+            # Parse the returned OrderedDict for filenames of user photos
+            #print("data2: " + str(data2))
+            for k,v in data2.items():
+                #storage.child("images/" + userId + "/" + val).download(val, val)           # dowloads image to local folder, testing only
+                print("v: ", v)
+                imageURL = storage.child("images/" + str(val) + "/" + v).get_url(None)      # URL for Google Storage Photo location
+                print("imageURL: ", imageURL)
+                all_user_photo_locations[val].append(imageURL)                 # Stores the URL of each photo for the user
+    
+        except AttributeError:
+            print("This user: '", val, "' has no photos. Skipped")
+        
+        
+        
+        print("HERE 288888888888888888888888888888888888888888888888888888888888888888888888")  
+    print(all_user_photo_locations)
+    return all_user_photo_locations
 
 
 
@@ -105,7 +123,6 @@ def welcome():
             redirect(url_for('/login'))
         elif request.form['button'] == 'registerScreen':
             redirect(url_for('/register'))
-    all_photo_grab()
     return render_template('welcome.html')                       #must be in directory (folder) names templates, grabs file form there
 
 
@@ -278,6 +295,7 @@ def login():
                     return redirect(url_for('home'))
                 except:
                     #Login Fail
+                    # TODO: output error message instead
                     app.logger.info('Login Failed: ' + unsuccesful)
                     return redirect(url_for('login'))
             elif request.form['button'] == 'registerScreen':
@@ -345,6 +363,7 @@ def home():
             print("Display Photos Start---------------------------------------")
             images = []                                                                     #image url storage list
             data = db.child("users").child(USER["uid"]).child("photos").get().val()         #opens users in db, then finds person by  uid in db
+
             # data has the id of each photo paired with the actual photo file name
             # Parse the returned OrderedDict for filenames of user photos
             for val in data.values():
@@ -472,7 +491,7 @@ def upload_image():
                         nameDetermined = anazlyzeInfo[0]
                         proba = anazlyzeInfo[1]
                         # TODO: Shawns Code is called here
-                        if nameDetermined == USER["firstName"]:
+                        if nameDetermined.lower() == USER["firstName"].lower():
                             # TODO: Tell lock to unlock for correct user
                             print(nameDetermined + " " + USER["firstName"])
                             
@@ -487,7 +506,6 @@ def upload_image():
                         app.logger.info(dataAdded)
 
                         #Add filename to Global USER
-                        global USER
                         USER["photos"].append(filename)
                         print(USER)
 
@@ -498,7 +516,9 @@ def upload_image():
                         # TODO:
                         #Update Facial Embeddings with new photo for user
                         print("Extract Start ------------------------------------")
-                        extract_embeddings.create_embeddings(USER["image_locations"], USER["firstName"])
+                        temp_all_users_dict = all_users()
+                        extract_embeddings.create_embeddings(temp_all_users_dict, USER["firstName"])
+                        train_model.train()
                 return redirect(request.url)
             elif request.form['button'] == 'logoutButton':
                 #Logout Button
