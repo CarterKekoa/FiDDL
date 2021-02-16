@@ -17,6 +17,7 @@ from werkzeug.utils import secure_filename                               #takes 
 import subprocess
 import recognize
 import extract_embeddings
+import train_model
 
 app = Flask(__name__)                                                    #call flask constuctor from object #__name__ references this file
 
@@ -497,7 +498,9 @@ def upload_image():
                         # TODO:
                         #Update Facial Embeddings with new photo for user
                         print("Extract Start ------------------------------------")
-                        extract_embeddings.create_embeddings(USER["image_locations"], USER["firstName"])
+                        #extract_embeddings.create_embeddings(USER["image_locations"], USER["firstName"])
+                        train_model.train()
+
                 return redirect(request.url)
             elif request.form['button'] == 'logoutButton':
                 #Logout Button
