@@ -30,6 +30,8 @@ db = firebase.database()
 app.secret_key = os.urandom(24)                                     #random secret key to track if user is logged in
 storage = firebase.storage()
 
+homeOwners = ["kevin", "carter"]
+
 
 # Initialize USER as a global dictionary
 USER = {
@@ -468,10 +470,15 @@ def upload_image():
                     if request.form.get('analyzer') == 'analyze':
                         #Analyze Check box checked. Run FR on uploaded image then
                         image.save(os.path.join(app.config["IMAGE_ANALYZE_UPLOAD"], filename))          #Saves analyzed photo to photosTest/analyzePhotos to be used by FR
-                        anazlyzeInfo = recognize.facialRecognition("photosTest/analyzePhotos/" + filename)
-                        print(anazlyzeInfo)
-                        nameDetermined = anazlyzeInfo[0]
-                        proba = anazlyzeInfo[1]
+                        analyzeInfo = recognize.facialRecognition("photosTest/analyzePhotos/" + filename)
+                        print(analyzeInfo)
+                        
+                        if analyzeInfo[0] in homeOwners:
+                            nameDetermined = "Approved Person"
+                        else:
+                            nameDetermined = "Unapproved Person"
+                        proba = analyzeInfo[1]
+
                         # TODO: Shawns Code is called here
                         if nameDetermined == USER["firstName"]:
                             # TODO: Tell lock to unlock for correct user
@@ -488,7 +495,6 @@ def upload_image():
                         app.logger.info(dataAdded)
 
                         #Add filename to Global USER
-                        global USER
                         USER["photos"].append(filename)
                         print(USER)
 
