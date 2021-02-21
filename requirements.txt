@@ -1,10 +1,4 @@
 appdirs==1.4.4
-<<<<<<< HEAD
-=======
-astroid==2.4.2
-certifi==2020.12.5
-chardet==4.0.0
->>>>>>> master
 click==7.1.2
 distlib==0.3.1
 filelock==3.0.12
@@ -13,31 +7,15 @@ gcloud==0.17.0
 googleapis-common-protos==1.52.0
 gunicorn==20.0.4
 httplib2==0.18.1
-<<<<<<< HEAD
 imutils==0.5.3
 itsdangerous==1.1.0
 Jinja2==2.11.2
 joblib==0.17.0
-=======
-idna==2.10
-imutils==0.5.4
-isort==5.6.4
-itsdangerous==1.1.0
-Jinja2==2.11.2
-joblib==1.0.0
->>>>>>> master
 jws==0.1.3
 MarkupSafe==1.1.1
-<<<<<<< HEAD
 numpy==1.19.4
 oauth2client==3.0.0
 opencv-python==4.4.0.46
-=======
-mccabe==0.6.1
-numpy==1.19.5
-oauth2client==3.0.0
-opencv-python==4.5.1.48
->>>>>>> master
 protobuf==3.14.0
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
@@ -46,7 +24,6 @@ Pyrebase==3.0.27
 python-jwt==2.0.1
 requests==2.11.1
 requests-toolbelt==0.7.0
-<<<<<<< HEAD
 rsa==4.6
 scikit-learn==0.23.2
 scipy==1.5.4
@@ -54,15 +31,3 @@ six==1.15.0
 threadpoolctl==2.1.0
 virtualenv==20.1.0
 Werkzeug==1.0.1
-=======
-rsa==4.7
-scikit-learn==0.23.2
-scipy==1.6.0
-six==1.15.0
-threadpoolctl==2.1.0
-toml==0.10.1
-urllib3==1.26.2
-virtualenv==20.2.2
-Werkzeug==1.0.1
-wrapt==1.12.1
->>>>>>> master
