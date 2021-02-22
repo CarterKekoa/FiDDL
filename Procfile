@@ -1,1 +1,1 @@
-web: gunicorn klunden-fiddl:app
+web: gunicorn fiddl:app
