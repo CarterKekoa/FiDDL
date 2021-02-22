@@ -18,6 +18,7 @@ import subprocess
 import recognize
 import extract_embeddings
 import train_model
+import cv2
 
 app = Flask(__name__)                                                    #call flask constuctor from object #__name__ references this file
 
