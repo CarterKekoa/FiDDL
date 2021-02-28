@@ -1,9 +1,3 @@
-#run with 'python3 app.py'   can view on 'localhost:5000'
-class FacialRec():
-    def __init__(self):
-            self.images =[]
-
-import re
 from flask import Flask, render_template, json, request, redirect, url_for, session, send_from_directory, flash
 from flask.globals import request
 from flask.templating import render_template_string
@@ -15,22 +9,46 @@ import imghdr
 from pyrebase.pyrebase import Storage                                    #for images
 from werkzeug.utils import secure_filename                               #takes a file name and returns a secure version of it
 import subprocess
-import recognize
-import extract_embeddings
-import train_model
+from datetime import timedelta                                          # used for permanent sessions
+
+# Facial Recognition File Imports
+import FacialRecognition.recognize as recognize
+import FacialRecognition.extract_embeddings as extract_embeddings
+import FacialRecognition.train_model as train_model
+
+# Testing multifile format
+from auth.auths import authsBP      # import the blueprints
+from users.user import userBP
+from general.main import mainBP
 
 app = Flask(__name__)                                                    #call flask constuctor from object #__name__ references this file
+   
+app.register_blueprint(authsBP, url_prefix="")      # register the blue prints
+app.register_blueprint(userBP, url_prefix="")
+app.register_blueprint(mainBP, url_prefix="")
 
+# Upload Image ---------------------------------
+#temp image upload location
+#TODO: put these in a private config file
+app.config["IMAGE_UPLOAD"] = "photosTest"
+app.config["IMAGE_ANALYZE_UPLOAD"] = "photosTest/analyzePhotos"
+app.config["ALLOWED_IMAGE_EXTENSIONS"] = ["PNG", "JPG", "JPEG"]
+app.config["MAX_IMAGE_FILESIZE"] = 4 * 1024 * 1024    #1,572,864 Bytes or 1572.864 KB
 
 
 #Initializations  ////////////////////////////////__________________________________________________
 firebase = pyrebase.initialize_app(json.load(open('firebase/firebaseConfig.json')))
 auth = firebase.auth()
 db = firebase.database()                                    
-app.secret_key = os.urandom(24)                                     #random secret key to track if user is logged in
+app.secret_key = os.urandom(24)                                     # random secret key to track if user is logged in
+app.permanent_session_lifetime = timedelta(hours=2)                 # how long permanent session will last, hours,min,days
 storage = firebase.storage()
 
-
+# Add initializations to sesson to be used by BluePrints
+app.config['firebase'] = firebase
+app.config['auth'] = auth
+app.config['db'] = db
+app.config['storage'] = storage
 # Initialize USER as a global dictionary
 USER = {
     "firstName": "",
@@ -40,11 +58,9 @@ USER = {
     "photos": [],
     "image_locations": []
     }
+app.config['USER'] = USER
 
-ALL = {
-    "all_images": []
-}
-
+"""
 # Functions ////////////////////////////////////////____________________________________________
 # Check if image is allowed function
 def allow_image(filename):
@@ -112,7 +128,6 @@ def all_users():
     return all_user_photo_locations
 
 
-
 # Routes ////////////////////////////////////////____________________________________________
 # Welcome Page ---------------------------------
 @app.route('/', methods=['GET', 'POST'])                                                #@ is a decorator, flask uses this to define its urls, define url with a route
@@ -120,11 +135,10 @@ def welcome():
     #Check if screen buttons are clicked
     if request.method == "POST":
         if request.form['button'] == 'loginScreen':
-            redirect(url_for('/login'))
+            redirect(url_for('/authsBP.login'))
         elif request.form['button'] == 'registerScreen':
-            redirect(url_for('/register'))
+            redirect(url_for('/authsBP.register'))
     return render_template('welcome.html')                       #must be in directory (folder) names templates, grabs file form there
-
 
 # Registration Page ---------------------------------
 @app.route('/register', methods=['GET', 'POST'])
@@ -186,6 +200,7 @@ def register():
                     app.logger.info(loggedIn)
 
                     #Session pdate that a user is now logged in
+                    session.permanent = True                        # This user session will last for 2 hours or until logged out
                     session['usr'] = user['idToken']
                     print(session)
                     print(session['usr'])
@@ -223,7 +238,6 @@ def register():
             return render_template('register.html')
   
     return render_template('register.html')
-
 
 #Login Page ---------------------------------
 @app.route('/login', methods=['GET', 'POST'])
@@ -266,6 +280,7 @@ def login():
                     #TODO: verify if user has verified their email 
                     
                     #Update session that a user is now logged in
+                    session.permanent = True
                     session['usr'] = user['idToken']
                     app.logger.info(sessionStarted)
 
@@ -302,12 +317,10 @@ def login():
                 #Switch to Register Screen
                 app.logger.info(registerScreen)
                 return redirect(url_for('register'))
-
         elif request.method == 'GET':
             return render_template('login.html') 
             
     return render_template('login.html')
-
 
 #Logout request ---------------------------------
 @app.route('/logout', methods=['GET', 'POST'])   
@@ -322,6 +335,7 @@ def logout():
     try:
         #Logout User
         auth.current_user = None                        #Logout from firebase Auth
+        session.permanent = False 
         session.clear()                                 #Clear User Session
         app.logger.info(loggedOut)
         flash(logoutSuccess, "info")                    #"info" is the type of message for more customization if we want, others are warning, info, error
@@ -532,27 +546,7 @@ def upload_image():
         return redirect(url_for('login'))
     
     return render_template("upload_image.html")
-
-
-
-#PRACTICE ---------------------------------
-@app.route('/api/userinfo')
-def userinfo():
-    return {'data': users1}, 200
-
-@app.route('/posts')
-def posts():
-    return render_template('posts.html', posts=all_posts)        # defined the variable posts, this is the one we can now use in html file
-
-@app.route('/home/users/<string:name>/posts/<int:id>')         #this runs the same function below, but now with url 'localhost:5000/home', so both pages show this now
-def hello(name, id):                                           #this code runs when we get to the above url, now 'name' references '<string:name>' so we can grab what is in the url there
-    return "Hello, " + name + " your id is: " + str(id)
-
-@app.route('/onlyget', methods=['GET', 'POST'])                #only allows get requests and posts, can specify which methods we want to do that using methods=...
-def get_req():
-    return 'You can only get this webpage.'
-
-
+"""
 
 if __name__ == "__main__":      #if running from command line, turn on dev mode
     app.run(debug=True)         #dev mode, server updates on own, shows errors
