@@ -10,6 +10,7 @@ from pyrebase.pyrebase import Storage                                    #for im
 from werkzeug.utils import secure_filename                               #takes a file name and returns a secure version of it
 import subprocess
 from datetime import timedelta                                          # used for permanent sessions
+import smartlock
 
 # Facial Recognition File Imports
 import FacialRecognition.recognize as recognize
@@ -20,6 +21,9 @@ import FacialRecognition.train_model as train_model
 from auth.auths import authsBP      # import the blueprints
 from users.user import userBP
 from general.main import mainBP
+
+
+
 
 app = Flask(__name__)                                                    #call flask constuctor from object #__name__ references this file
    
@@ -49,6 +53,7 @@ app.config['firebase'] = firebase
 app.config['auth'] = auth
 app.config['db'] = db
 app.config['storage'] = storage
+
 # Initialize USER as a global dictionary
 USER = {
     "firstName": "",
@@ -507,8 +512,9 @@ def upload_image():
                         # TODO: Shawns Code is called here
                         if nameDetermined.lower() == USER["firstName"].lower():
                             # TODO: Tell lock to unlock for correct user
+                            smartlock.unlock()
                             print(nameDetermined + " " + USER["firstName"])
-                            
+                        
                         return render_template("upload_image.html", name=nameDetermined, proba=proba)
                     else:
                         #Images being uploaded to db instead

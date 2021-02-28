@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, session, current_app, request, redirect, url_for, flash
 import os       # Used when getting the uploaded image
 from werkzeug.utils import secure_filename       #takes a file name and returns a secure version of it, for saving new photo file name
+import smartlock
 
 # Facial Recognition File Imports
 import FacialRecognition.recognize as recognize
@@ -225,6 +226,7 @@ def upload_image():
                     print("userId: ")
                     print(userId)
                     userIdToken = auth.current_user['idToken']
+                    print("userIdToken auth.current_user['idToken']:", userIdToken)
 
                     image.seek(0)                               #NEED THIS! We point to the end of the file above to find the size, this causes a empty file to upload without this fix
                     
@@ -234,12 +236,16 @@ def upload_image():
                         image.save(os.path.join(current_app.config["IMAGE_ANALYZE_UPLOAD"], filename))          #Saves analyzed photo to photosTest/analyzePhotos to be used by FR
                         anazlyzeInfo = recognize.facialRecognition("photosTest/analyzePhotos/" + filename)
                         os.remove("photosTest/analyzePhotos/" + filename)           # remove the photo from photosTest/analyzePhotos
-                        print(anazlyzeInfo)
+                        print("analyze infor FR recognize:", anazlyzeInfo)
                         userIdDetermined = anazlyzeInfo[0]
                         proba = anazlyzeInfo[1]
                         # TODO: Shawns Code is called here
+                        print("userIdDetermined:", userIdDetermined)
+                        print("USER[uid]:", USER["uid"])
+                        print("")
                         if userIdDetermined.lower() == USER["uid"].lower():
                             # TODO: Tell lock to unlock for correct user
+                            smartlock.unlock()
                             print(userIdDetermined + " " + USER["firstName"])
                             userNameDetermined = USER["firstName"]
                             
