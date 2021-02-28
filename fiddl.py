@@ -17,7 +17,7 @@ from werkzeug.utils import secure_filename                               #takes 
 import subprocess
 import recognize
 import extract_embeddings
-
+import smartlock
 app = Flask(__name__)                                                    #call flask constuctor from object #__name__ references this file
 
 
@@ -474,8 +474,9 @@ def upload_image():
                         # TODO: Shawns Code is called here
                         if nameDetermined == USER["firstName"]:
                             # TODO: Tell lock to unlock for correct user
+                            smartlock.unlock()
                             print(nameDetermined + " " + USER["firstName"])
-                            
+                        
                         return render_template("upload_image.html", name=nameDetermined, proba=proba)
                     else:
                         #Images being uploaded to db instead
