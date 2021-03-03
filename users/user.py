@@ -266,13 +266,17 @@ def upload_image():
                         #Add photo filename data to realtime database, for reference later
                         db.child("users").child(userId).child("photos").push(filename)
                         current_app.logger.info(dataAdded)
-
+                        """
                         # TODO:
                         #Update Facial Embeddings with new photo for user
                         print("Extract Start ------------------------------------")
+                        
                         temp_all_users_dict = all_users()
-                        extract_embeddings.create_embeddings(temp_all_users_dict, USER["firstName"])
+                        # TODO: used to say extract_embeddings.create_embeddings(temp_all_users_dict, USER['FirstName'])
+                        #  pretty sure I didnt need it so we could move the button functions  to welcome page
+                        extract_embeddings.create_embeddings(temp_all_users_dict)
                         train_model.train()
+                        """
                 return redirect(request.url)
             elif request.form['button'] == 'logoutButton':
                 #Logout Button

@@ -14,7 +14,7 @@ import urllib.request
 import certifi
 import requests
 
-def create_embeddings(locations_dict, name):
+def create_embeddings(locations_dict):
 	# load our serialized face detector from disk
 	print("[INFO] loading face detector...")
 	protoPath = os.path.sep.join(["face_detection_model", "deploy.prototxt"])

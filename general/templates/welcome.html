@@ -7,13 +7,22 @@
 {% block body %} 
 <div>
     <label>Nav Bar</label>
-    <form action="/login">
+    <form method="POST">
         <button class="nav-bar login" type="submit" name="button" value="loginScreen" method="POST">Login</button>
-    </form>
-    <form action="/register">
         <button class="nav-bar register" type="submit" name="button" value="registerScreen" method="POST">Register</button>
+        <button class="nav-bar train" type="submit" name="button" value="trainButton" method="POST">Train Facial Recognition Models</button>
     </form>
 </div>
+{% with messages = get_flashed_messages() %}
+    <!--Check if there are any messages-->
+    {% if messages %}
+        <!--Loop through the messages-->
+        {% for msg in messages %}
+            <p style="background-color:burlywood;">{{msg}}</p>
+        {% endfor%}
+    {% endif %}
+{% endwith %}
+
 <h1>Welcome To FiDDL</h1>
 <h2>What do we do?</h2>
 <p>FiDDL stands for Face ID Door Lock</p>
