@@ -95,7 +95,7 @@ def home():
         userId = auth.current_user['localId']               #auth.current_user is how we get the current users data
 
         #Grab users name
-        user = db.child("users").child(USER["uid"]).get().val()
+        user = db.child("users").child(session['localId']).get().val()
         #Parse the returned OrderedDict of data
         for val in user.values():
             #Grab logining in users name from database. Not necessary here
@@ -111,7 +111,7 @@ def home():
             # Prints stored user photos to users home screen
             print("Display Photos Start---------------------------------------")
             images = []                                                                     #image url storage list
-            data = db.child("users").child(USER["uid"]).child("photos").get().val()         #opens users in db, then finds person by  uid in db
+            data = db.child("users").child(session['localId']).child("photos").get().val()         #opens users in db, then finds person by  uid in db
             print("session[usr]:", session['usr'])
             print("USER[uid]", USER["uid"])
             print("data", data)
@@ -243,11 +243,11 @@ def upload_image():
                         print("userIdDetermined:", userIdDetermined)
                         print("USER[uid]:", USER["uid"])
                         print("")
-                        if userIdDetermined.lower() == USER["uid"].lower():
+                        if userIdDetermined.lower() == session['localId'].lower():
                             # TODO: Tell lock to unlock for correct user
                             smartlock.unlock()
-                            print(userIdDetermined + " " + USER["firstName"])
-                            userNameDetermined = USER["firstName"]
+                            print(userIdDetermined + " " + session['localId'])
+                            userNameDetermined = session["firstName"]
                             
                         return render_template("upload_image.html", name=userNameDetermined, proba=proba)
                     else:

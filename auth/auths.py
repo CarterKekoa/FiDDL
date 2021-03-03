@@ -2,7 +2,18 @@ from flask import Blueprint, render_template, session, current_app, request, red
 
 authsBP = Blueprint("auth", __name__, static_folder="static", template_folder="templates")
 
-    
+# Colors for colored terminal prints
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
 def initialize_data():
     firebase = current_app.config['firebase']
     auth = current_app.config['auth']
@@ -15,46 +26,40 @@ def initialize_data():
 def email_verified_check():
     return False
 
-#Login Page ---------------------------------
+#Login Page ---------------------------------------------------------------------------------------------------
 @authsBP.route('/login', methods=['GET', 'POST'])
 def login():
-    #Alert Messages
-    loginStart = "Login Process initial check began (Login - Good)"
-    current_app.logger.info(loginStart)
-    try:
-        #User already logged in check
-        print(session['usr'])                                   #simple test to see if a user is already logged in, if yes go to home page
-        current_app.logger.info("A user is already logged in")
+    current_app.logger.info("[LOGIN]")
+    # Check if a user is already logged in
+    if not session.get('usr') is None:
+        current_app.logger.info("[LOGIN] The user: ", session['usr'], " is already logged in, redirecting home.")
         return redirect(url_for('users.home'))                        #Send to home page
-    except KeyError:
+    else:
+        # Start Login Process
+        current_app.logger.info("[LOGIN] No session['usr'] found (AKA No user currently logged in (Good since logging in): ")
         firebase, auth, db, storage, USER = initialize_data()
-        # Alert Messages
-        unsuccesful = 'Your email or password was incorrect (Login - Bad)'
-        succesful = 'Login Successful (Login - Good)'
-        loginData = 'Login user data added to Global (Login - Good)'
-        dataGrab = 'User data grabbed from Firebase (Login - Good)'
-        loginSuccess = ' logged in, moving to home screen (Login - Good)'
-        registerScreen = 'Navigating to Register Screen Instead (Login - Good)'
-        loginBegan = "Login checks started (Login - Good)"
-        sessionStarted = "Loged in user session started (Login - Good)"
-        
-        current_app.logger.info(loginBegan)
 
-        #Check if button is pressed
+        registerScreen = 'Navigating to Register Screen Instead (Login - Good)'
+
+        print()
+        current_app.logger.info("[LOGIN] Login Process Started----------------------------------------------------------------------------------")
+        
+        #Check if HTML button is pressed
         if request.method == 'POST':
-            #Check which button
             if request.form['button'] == 'login': 
                 #Login Button Pressed
                 email = request.form['email']
                 password = request.form['password']
-                print(email, password)
+                print(bcolors.OKBLUE, "                             Entered Email: ", email, " Pass: ", password, bcolors.ENDC)
                 #TODO: stay logged in button?
                 try:
+                    current_app.logger.info("[LOGIN] Google Authentication Started")
                     #Log user in with input credentails
                     user = auth.sign_in_with_email_and_password(email, password)
-                    current_app.logger.info(succesful)
+                    current_app.logger.info("[LOGIN] Google Authentication Success, storing user info")
                     #TODO: verify if user has verified their email 
-                    
+                    # Prints to see what is returned from Google auth
+                    """
                     for val in user:
                         print("val:", val)
 
@@ -66,48 +71,52 @@ def login():
                     print("registered:", user['registered'])
                     print("refreshToken:", user['refreshToken'])
                     print("expiresIn:", user['expiresIn'])
+                    """
 
                     #Update session that a user is now logged in
                     session.permanent = True
-                    session['usr'] = user['idToken']
-                    session['localId'] = user['localId']
-                    current_app.logger.info(sessionStarted)
-
-                    #Add Data to Global USER to get data
-                    USER["email"] = user["email"]
-                    USER["uid"] = user["localId"]
-                    current_app.logger.info(loginData)
+                    session['usr'] = user['idToken']        # stores the users long Id number
+                    session['localId'] = user['localId']    # stores the users short Id (This is what their data/photos are stored under)
+                    session['email'] = user["email"]        # stores the users email
+                    current_app.logger.info("[LOGIN] Session Started with user info stored")
+                    print(bcolors.OKBLUE, "                             Logged in User localId: ", session['localId'], bcolors.ENDC)
 
                     #Grab users name
-                    data = db.child("users").child(USER["uid"]).get().val()         #opens users in db, then finds person by  uid in db
-                    current_app.logger.info(dataGrab)
+                    current_app.logger.info("[LOGIN] Google User Data Grab Started")
+                    data = db.child("users").child(session['localId']).get().val()         #opens users in db, then finds person by  uid in db
+                    good_data = False
 
                     #Parse the returned OrderedDict of data
                     for val in data.values():
                         #Grab logining in users name from database. Not necessary here
                         for k,v in val.items():
-                            current_app.logger.info("login k,v:" + k,v)
+                            print(bcolors.OKBLUE, "                             Users Google Data: key: ", k, " value: ", v, bcolors.ENDC)
+                            session[k] = v
                             if k == 'firstName':
-                                current_app.logger.info("login v")
-                                name = v
-                    current_app.logger.info("User logged in: " + name)
-
-                    #Send user to Home screen
-                    current_app.logger.info(name + loginSuccess)
+                                good_data = True
+                        if good_data:
+                            current_app.logger.info("[LOGIN] Google User Data Grab Success")
+                        else:
+                            print(bcolors.WARNING, "                             [ERROR Described Below]", bcolors.ENDC)
+                            current_app.logger.info("[ERROR - LOGIN] Google User Data Grab Fail, check user: ", session['localId'], " database for more info")
+                            return redirect(url_for('auth.login'))
+                    current_app.logger.info("[LOGIN] Login Process Ended, Moving to [HOME]----------------------------------------------------------------------------------")
                     return redirect(url_for('users.home'))
-                except:
+                except Exception as err:
                     #Login Fail
-                    # TODO: output error message instead
-                    current_app.logger.info('Login Failed: ' + unsuccesful)
+                    print(bcolors.FAIL, "                             [ERROR Described Below]", bcolors.ENDC)
+                    current_app.logger.info("[ERROR - LOGIN] Error Occured: ", err)
+                    current_app.logger.info("[LOGIN] Login Process Ended, restarting [LOGIN]----------------------------------------------------------------------------------")
                     return redirect(url_for('auth.login'))
             elif request.form['button'] == 'registerScreen':
                 #Switch to Register Screen
-                current_app.logger.info(registerScreen)
+                current_app.logger.info("[LOGIN] Switching to Register Screen")
+                current_app.logger.info("[LOGIN] Login Process Ended, moving to [REGISTER]----------------------------------------------------------------------------------")
                 return redirect(url_for('auth.register'))
         elif request.method == 'GET':
             return render_template('login.html') 
-    
     return render_template('login.html')
+# End of Login Route ---------------------------------------------------------------------------------------------------
 
 # Registration Page ---------------------------------
 @authsBP.route('/register', methods=['GET', 'POST'])
