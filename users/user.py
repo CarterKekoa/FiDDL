@@ -10,6 +10,17 @@ import FacialRecognition.train_model as train_model
 
 userBP = Blueprint("users", __name__, static_folder="static", template_folder="templates")
 
+# Colors for colored terminal prints
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
 
 def initialize_data():
     firebase = current_app.config['firebase']
@@ -27,109 +38,89 @@ def allow_image(filename):
     
     ext = filename.rsplit(".", 1)[1]
 
+    # Check if the image filename has already been stored
+    if not session.get('userPhotoNames') is None:
+        for k,v in session['userPhotoNames'].items():
+            if v == filename:
+                current_app.logger.warning("[UPLOAD_IMAGE] Invalid, Image File Name is already stored")
+                dupFileName = "This file name has previously been stored on this account. This could mean this same photo has also already been uploaded to this account. Please try a new photo for best accuracy."
+                flash(dupFileName, "info")                    #"info" is the type of message for more customization if we want, others are warning, info, error
+                return False
+
     #convert type to upper case
     if ext.upper() in current_app.config["ALLOWED_IMAGE_EXTENSIONS"]:
+        current_app.logger.info("[UPLOAD_IMAGE] Valid Image File Name")
         return True
     else:
+        current_app.logger.warning("[UPLOAD_IMAGE] Invalid Image File Name")
+        badFileName = "Please use an acceptable file name."
+        flash(badFileName, "info")                    #"info" is the type of message for more customization if we want, others are warning, info, error
         return False
 
 # Check image file size 
 def allowed_image_filesize(file_size):
     if int(file_size) <= current_app.config["MAX_IMAGE_FILESIZE"]:
+        current_app.logger.info("[UPLOAD_IMAGE] Valid Image File Size")
         return True
     else:
+        current_app.logger.warning("[UPLOAD_IMAGE] Invalid Image File Size")
+        badFileSize = "File size is too large. Be sure the file size is less than 1,572,864 Bytes or 1572.864 KB"
+        flash(badFileSize, "info")                    #"info" is the type of message for more customization if we want, others are warning, info, error
         return False
 
-# grabs each users photos and returns their urls in a Dictionary
-def all_users():
-    firebase, auth, db, storage, USER = initialize_data()
-    data = db.child("users").get().val()    # grabs all user TokenIds
-    print("Data: ")
-    print(data.values())
-
-    all_user_photo_locations = {}
-
-    #Parse the returned OrderedDict of data
-    for val in data:
-        #Grab logining in users name from database. Not necessary here
-        all_user_photo_locations[val] = []
-        data2 = db.child("users").child(val).child("photos").get()
-
-        try:
-            data2 = data2.val()
-
-            # data has the id of each photo paired with the actual photo file name
-            # Parse the returned OrderedDict for filenames of user photos
-            #print("data2: " + str(data2))
-            for k,v in data2.items():
-                #storage.child("images/" + userId + "/" + val).download(val, val)           # dowloads image to local folder, testing only
-                print("v: ", v)
-                imageURL = storage.child("images/" + str(val) + "/" + v).get_url(None)      # URL for Google Storage Photo location
-                print("imageURL: ", imageURL)
-                all_user_photo_locations[val].append(imageURL)                 # Stores the URL of each photo for the user
-    
-        except AttributeError:
-            print("This user: '", val, "' has no photos. Skipped")
-        
-        
-        
-        print("HERE 288888888888888888888888888888888888888888888888888888888888888888888888")  
-    print(all_user_photo_locations)
-    return all_user_photo_locations
-
-# Home Page ---------------------------------
+# Home Page ---------------------------------------------------------------------------------------------------
 @userBP.route('/home', methods=["GET", "POST"])
 def home():
-    #Alert Messages
-    userLogedIn = "User is still logged in (Home - Good)."
-    userNotIn = "No user logged in (Home - Bad)."
-    noPhoDisplay = "User has no photos to display"
-
-    try:
-        #Check if user is logged in
-        print(session['usr'])
-        current_app.logger.info(userLogedIn)
-
+    current_app.logger.info("[HOME]")
+    # Check if a user is already logged in
+    if not session.get('usr') is None:
+        print()
+        current_app.logger.info("[HOME] Home Process Started----------------------------------------------------------------------------------")
+        current_app.logger.info("[HOME] A user is logged in, continue.")
+        print(bcolors.OKBLUE, "                             Loged in user: ", session['localId'], bcolors.ENDC)
         firebase, auth, db, storage, USER = initialize_data()
-
-        userId = auth.current_user['localId']               #auth.current_user is how we get the current users data
-
-        #Grab users name
-        user = db.child("users").child(session['localId']).get().val()
-        #Parse the returned OrderedDict of data
-        for val in user.values():
-            #Grab logining in users name from database. Not necessary here
-            for k,v in val.items():
-                print(k,v)
-                if k == 'firstName':
-                    name = v
-                    USER["firstName"] = name
-                    print(name)
-        
-
         try:
+            userId = auth.current_user['localId']               #auth.current_user is how we get the current users data
+        
+            photo_names_in_db = {}  # will be popluated with all of the users uploaded photo names
+            images = []             # will store the urls of the users photos
+            image_names = []        # will simply store the images names that exist in the users database
+            
+            current_app.logger.info("[HOME] Attempting to grab users database information...")
+            #Grab users name
+            user = db.child("users").child(session['localId']).get().val()
+            #Parse the returned OrderedDict of data
+            for val in user.values():
+                #Grab logining in users name from database. Not necessary here
+                for k,v in val.items():
+                    #print(k,v)
+                    if k[0] == '-':
+                        photo_names_in_db[k] = v
+                        image_names.append(v)
+                        imageURL = storage.child("images/" + userId + "/" + v).get_url(None)      # URL for Google Storage Photo location
+                        images.append(imageURL)                 # Stores the URL of each photo for the user
+                    else:
+                        session[k] = v
+                        print(bcolors.OKBLUE, "                             session[", k, "]:", session[k], bcolors.ENDC)
+                
+            session['userPhotoNames'] = photo_names_in_db        # session['userPhotoNames'] has the id of each photo paired with the actual photo file name
+            print(bcolors.OKBLUE, "                             session['userPhotoNames']: ", session['userPhotoNames'], bcolors.ENDC)
+            session["userImageURLs"] = images
+            session["justPhotoNames"] = image_names
+            print()
+            print(bcolors.OKBLUE, "                             session['userImageURLs']: ", session['userImageURLs'], bcolors.ENDC)
+            print()
+            current_app.logger.info("[HOME] Users database information grabbed succesfully.")
+        
             # Prints stored user photos to users home screen
-            print("Display Photos Start---------------------------------------")
-            images = []                                                                     #image url storage list
-            data = db.child("users").child(session['localId']).child("photos").get().val()         #opens users in db, then finds person by  uid in db
-            print("session[usr]:", session['usr'])
-            print("USER[uid]", USER["uid"])
-            print("data", data)
-
-            # data has the id of each photo paired with the actual photo file name
-            # Parse the returned OrderedDict for filenames of user photos
-            for val in data.values():
-                print("val: " + str(val))               # val = file names of photos stored (from database aka dictionary)
-                #storage.child("images/" + userId + "/" + val).download(val, val)           # dowloads image to local folder, testing only
-                imageURL = storage.child("images/" + userId + "/" + val).get_url(None)      # URL for Google Storage Photo location
-                print("imageURL: " + str(imageURL))
-                images.append(imageURL)                 # Stores the URL of each photo for the user
-            USER["image_locations"] = images            # Stores the users URL list in Global variable. TODO: Make sure to delete this when session ends
-            #print(str(USER["image_locations"]))
-            print("Display Photos End---------------------------------------")
-            return render_template('home.html', firstName=USER["firstName"], images=USER["image_locations"])
-        except:
-            render_template('home.html', firstName=USER["firstName"])
+            current_app.logger.info("[HOME] Displaying photos to screen...")
+            return render_template('home.html', firstName=session["firstName"], images=session["userImageURLs"], imgNames = session["justPhotoNames"])
+        except Exception as err:
+            # Home Fail
+            print(bcolors.FAIL, "                             [ERROR Described Below]", bcolors.ENDC)
+            current_app.logger.warning("[ERROR - HOME] Error Occured: ")
+            print(bcolors.FAIL, "                             ", err, bcolors.ENDC)
+            render_template('home.html', firstName=session["firstName"])
         
         if request.method == "POST":
             #Check if button is clicked
@@ -142,25 +133,16 @@ def home():
             elif request.form['button'] == 'logoutButton':
                 #Logout Button
                 return redirect(url_for('auth.logout'))
-            elif request.form['button'] == 'analyzePhoto':
-                #facial_rec = FacialRec()
-                #facial_rec.images = images
-                #print(facial_rec.images)
-                #TODO:
-                print("TODO")
             return render_template('home.html')
-
-        if request.method == "GET":
+        elif request.method == "GET":
             render_template('home.html')
-
-    except KeyError:
-        current_app.logger.info(userNotIn)
+    else:
+        current_app.logger.warning("[HOME] No user currently logged in, redirecting moving to [LOGIN]----------------------------------------------------------------------------------")
         return redirect(url_for('auth.login'))
-    
     return render_template('home.html')
 
 
-
+# TODO: optimize this route
 # Upload Image ---------------------------------
 @userBP.route('/upload-image', methods=["GET", "POST"])
 def upload_image():

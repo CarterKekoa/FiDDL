@@ -32,12 +32,11 @@ app.register_blueprint(userBP, url_prefix="")
 app.register_blueprint(mainBP, url_prefix="")
 
 # Upload Image ---------------------------------
-#temp image upload location
-#TODO: put these in a private config file
+# TODO: put these in a private config file
 app.config["IMAGE_UPLOAD"] = "photosTest"
 app.config["IMAGE_ANALYZE_UPLOAD"] = "photosTest/analyzePhotos"
 app.config["ALLOWED_IMAGE_EXTENSIONS"] = ["PNG", "JPG", "JPEG"]
-app.config["MAX_IMAGE_FILESIZE"] = 4 * 1024 * 1024    #1,572,864 Bytes or 1572.864 KB
+app.config["MAX_IMAGE_FILESIZE"] = 4 * 1024 * 1024    # 1,572,864 Bytes or 1572.864 KB
 
 
 #Initializations  ////////////////////////////////__________________________________________________

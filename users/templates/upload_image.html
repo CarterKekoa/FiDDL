@@ -13,6 +13,16 @@
         <button type="submit" name="button" value="backHomeButton">Home</button>
     </form>
 
+    {% with messages = get_flashed_messages() %}
+        <!--Check if there are any messages-->
+        {% if messages %}
+            <!--Loop through the messages-->
+            {% for msg in messages %}
+                <p style="background-color:burlywood;">{{msg}}</p>
+            {% endfor%}
+        {% endif %}
+    {% endwith %}
+
     <div class="container">
         <div class="row">
             <div class="col">
