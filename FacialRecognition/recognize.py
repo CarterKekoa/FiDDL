@@ -14,7 +14,7 @@ import cv2			#pip3 install opencv-python	#pip3 install scikit-learn==0.23.2
 import os
 
 
-def facialRecognition(imageName):
+def facialRecognition(imagePath):
 	# load our serialized face detector from disk
 	print("[INFO] loading face detector...")
 	protoPath = os.path.sep.join(["face_detection_model", "deploy.prototxt"])
@@ -32,7 +32,7 @@ def facialRecognition(imageName):
 
 	# load the image, resize it to have a width of 600 pixels (while
 	# maintaining the aspect ratio), and then grab the image dimensions
-	image = cv2.imread(imageName)
+	image = cv2.imread(imagePath)
 	image = imutils.resize(image, width=600)
 	(h, w) = image.shape[:2]
 
@@ -95,8 +95,9 @@ def facialRecognition(imageName):
 			#render_template("upload_image.html", i=image)
 	# show the output image
 	#cv2.imshow("Image", image)
+	#cv2.waitKey(0)
 	return info
-	cv2.waitKey(0)
+	
 
 ##################### Called from command line #####################
 if __name__ == "__main__":
@@ -197,6 +198,3 @@ if __name__ == "__main__":
 	print(text)
 	cv2.imshow("Image", image)
 	cv2.waitKey(0)
-
-#else:
-	#print("hi")
