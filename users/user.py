@@ -221,7 +221,7 @@ def upload_image():
                             #Analyze Check box checked. Run FR on uploaded image then
                             # TODO: this save isnt working when deployed. May have to try just passing the image directly
                             print("1")
-                            image.save(os.path.join(current_app.config["IMAGE_UPLOAD_DIR"], filename))          #Saves analyzed photo to photosTest/analyzePhotos to be used by FR
+                            image.save(os.path.join(current_app.config["IMAGE_UPLOAD_DIR"]))          #Saves analyzed photo to photosTest/analyzePhotos to be used by FR
                             print("2")
                             anazlyzeInfo = recognize.facialRecognition(os.path.join(current_app.config["IMAGE_UPLOAD_DIR"], filename))
                             print(bcolors.OKBLUE, "                             FR analyzed info: ", anazlyzeInfo, bcolors.ENDC)
