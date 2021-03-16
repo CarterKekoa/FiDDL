@@ -90,7 +90,7 @@ def home():
         firebase, auth, db, storage, USER = initialize_data()
         print("1")
         try:
-            userId = auth.current_user['localId']               #auth.current_user is how we get the current users data
+            #userId = auth.current_user['localId']               #auth.current_user is how we get the current users data
             print("2")
             photo_names_in_db = {}  # will be popluated with all of the users uploaded photo names
             images = []             # will store the urls of the users photos
@@ -109,7 +109,7 @@ def home():
                     if k[0] == '-':
                         photo_names_in_db[k] = v
                         image_names.append(v)
-                        imageURL = storage.child("images/" + userId + "/" + v).get_url(None)      # URL for Google Storage Photo location
+                        imageURL = storage.child("images/" + session['localId'] + "/" + v).get_url(None)      # URL for Google Storage Photo location
                         images.append(imageURL)                 # Stores the URL of each photo for the user
                     else:
                         session[k] = v
@@ -208,9 +208,10 @@ def upload_image():
                         print(bcolors.OKBLUE, "                             Secure Image Filename: ", filename, bcolors.ENDC)
         
                         #Get user local Id to store their photos seperate
-                        userId = auth.current_user['localId']               #auth.current_user is how we get the current users data, userId is so each user has their own photo folder
-                        print(bcolors.OKBLUE, "                             userId: ", userId, bcolors.ENDC)
-                        userIdToken = auth.current_user['idToken']
+                        #userId = auth.current_user['localId']               #auth.current_user is how we get the current users data, userId is so each user has their own photo folder
+                        print(bcolors.OKBLUE, "                             session['localId']: ", session['localId'], bcolors.ENDC)
+                        #userIdToken = auth.current_user['idToken']
+                        userIdToken = session['usr']
                         #print(bcolors.OKBLUE, "                             userIdToken: ", userIdToken, bcolors.ENDC)
 
                         image.seek(0)                               #NEED THIS! We point to the end of the file above to find the size, this causes a empty file to upload without this fix
@@ -251,17 +252,17 @@ def upload_image():
                                 # used to detect and crop faces in images. Doesnt really improve FR accuracy so it will die here
                                 #image.save(os.path.join(current_app.config["IMAGE_UPLOAD_DIR"], filename))          #Saves analyzed photo to photosTest/analyzePhotos to be used by FR
                                 #detect_faces.detect_face(os.path.join(current_app.config["IMAGE_UPLOAD_DIR"], filename))
-                                #storage.child("images/" + userId + "/" + filename).put(os.path.join(current_app.config["IMAGE_UPLOAD_DIR"], filename), userIdToken)
+                                #storage.child("images/" + session['usr'] + "/" + filename).put(os.path.join(current_app.config["IMAGE_UPLOAD_DIR"], filename), userIdToken)
                                 #os.remove(os.path.join(current_app.config["IMAGE_UPLOAD_DIR"], filename))           # remove the photo from photosTest/analyzePhotos
                                 current_app.logger.info("[UPLOAD-IMAGE] Photo saved and Analyzed by FR")
                                 
                                 #TODO: test the photo the user is uploading and tell them if it is good or not
                                 #Save user photo to Google Storage
-                                storage.child("images/" + userId + "/" + filename).put(image, userIdToken)
+                                storage.child("images/" + session['usr'] + "/" + filename).put(image, userIdToken)
                                 current_app.logger.info("[UPLOAD-IMAGE] Photo stored.")
 
                                 #Add photo filename data to realtime database, for reference later
-                                db.child("users").child(userId).child("photos").push(filename)
+                                db.child("users").child(session['usr']).child("photos").push(filename)
                                 current_app.logger.info("[UPLOAD-IMAGE] Photo filename stored.")
 
                     return redirect(request.url)
