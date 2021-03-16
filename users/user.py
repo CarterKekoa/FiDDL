@@ -88,18 +88,21 @@ def home():
         current_app.logger.info("[HOME] A user is logged in, continue.")
         print(bcolors.OKBLUE, "                             Loged in user: ", session['localId'], bcolors.ENDC)
         firebase, auth, db, storage, USER = initialize_data()
+        print("1")
         try:
             userId = auth.current_user['localId']               #auth.current_user is how we get the current users data
-        
+            print("2")
             photo_names_in_db = {}  # will be popluated with all of the users uploaded photo names
             images = []             # will store the urls of the users photos
             image_names = []        # will simply store the images names that exist in the users database
-            
+            print("3")
             current_app.logger.info("[HOME] Attempting to grab users database information...")
             #Grab users name
             user = db.child("users").child(session['localId']).get().val()
+            print("4")
             #Parse the returned OrderedDict of data
             for val in user.values():
+                print("5")
                 #Grab logining in users name from database. Not necessary here
                 for k,v in val.items():
                     #print(k,v)
