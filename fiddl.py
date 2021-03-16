@@ -48,6 +48,11 @@ auth = firebase.auth()
 db = firebase.database()                                    
 storage = firebase.storage()
 
+#if running from command line, turn on dev mode
+if not os.environ.get('SECRET_KEY') is None:
+    app.secret_key = os.environ["SECRET_KEY"]                  # To get Heroku Envrionment Variable
+app.permanent_session_lifetime = timedelta(hours=2)            # how long permanent session will last, hours,min,days
+
 # Add initializations to sesson to be used by BluePrints
 app.config['firebase'] = firebase
 app.config['auth'] = auth
@@ -66,7 +71,6 @@ USER = {
 app.config['USER'] = USER
 
 if __name__ == "__main__":      
-    #if running from command line, turn on dev mode
+    print("__main__")
     app.secret_key = os.urandom(24)                                # random secret key to track if user is logged in
-    app.permanent_session_lifetime = timedelta(hours=2)            # how long permanent session will last, hours,min,days
     app.run(debug=True)         #dev mode, server updates on own, shows errors

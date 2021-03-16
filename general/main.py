@@ -54,6 +54,7 @@ def all_users():
 @mainBP.route('/', methods=['GET', 'POST'])                                                #@ is a decorator, flask uses this to define its urls, define url with a route
 def welcome():
     #Check if screen buttons are clicked
+    
     if request.method == "POST":
         if request.form['button'] == 'loginScreen':
             return redirect(url_for('auth.login'))
