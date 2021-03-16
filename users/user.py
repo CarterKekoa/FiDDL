@@ -13,6 +13,7 @@ import FacialRecognition.detect_faces as detect_faces
 
 userBP = Blueprint("users", __name__, static_folder="static", template_folder="templates")
 
+
 # Colors for colored terminal prints
 class bcolors:
     HEADER = '\033[95m'
@@ -156,10 +157,12 @@ def home():
 @userBP.route('/upload-image', methods=["GET", "POST"])
 def upload_image():
     current_app.logger.info("[UPLOAD-IMAGE]")
+    print(bcolors.OKBLUE, "                             app.configapp.config[IMAGE_UPLOAD_DIR]: ", current_app.config["IMAGE_UPLOAD_DIR"], bcolors.ENDC)
+    
     # Check if a user is already logged in
     if not session.get('usr') is None:
         print()
-        current_app.logger.info("[UPLOAD-IMAGE] Home Process Started----------------------------------------------------------------------------------")
+        current_app.logger.info("[UPLOAD-IMAGE] Upload Image Process Started----------------------------------------------------------------------------------")
         current_app.logger.info("[UPLOAD-IMAGE] A user is logged in, continue.")
         print(bcolors.OKBLUE, "                             Loged in user: ", session['localId'], bcolors.ENDC)
 
@@ -170,7 +173,7 @@ def upload_image():
                 if request.files:
                     current_app.logger.info("[UPLOAD-IMAGE] Starting to get user photo")
                     image = request.files["image"]                        #works the same as user input email in register, get the image file
-                    print(bcolors.WARNING, "                             file type: ", type(image), bcolors.ENDC)
+                    #print(bcolors.WARNING, "                             file type: ", type(image), bcolors.ENDC)
 
                     print(bcolors.OKBLUE, "                             Image Grabbed: ", image, bcolors.ENDC)
 
@@ -210,12 +213,13 @@ def upload_image():
                         #Check if to run FR or Store photo
                         if request.form.get('analyzer') == 'analyze':
                             #Analyze Check box checked. Run FR on uploaded image then
-                            image.save(os.path.join(current_app.config["IMAGE_ANALYZE_UPLOAD"], filename))          #Saves analyzed photo to photosTest/analyzePhotos to be used by FR
-                            anazlyzeInfo = recognize.facialRecognition("photosTest/analyzePhotos/" + filename)
+                            # TODO: this save isnt working when deployed. May have to try just passing the image directly
+                            image.save(os.path.join(current_app.config["IMAGE_UPLOAD_DIR"], filename))          #Saves analyzed photo to photosTest/analyzePhotos to be used by FR
+                            anazlyzeInfo = recognize.facialRecognition(os.path.join(current_app.config["IMAGE_UPLOAD_DIR"], filename))
                             print(bcolors.OKBLUE, "                             FR analyzed info: ", anazlyzeInfo, bcolors.ENDC)
                             current_app.logger.info("[UPLOAD-IMAGE] Photo saved and Analyzed by FR")
                             
-                            os.remove("photosTest/analyzePhotos/" + filename)           # remove the photo from photosTest/analyzePhotos
+                            os.remove(os.path.join(current_app.config["IMAGE_UPLOAD_DIR"], filename))           # remove the photo from photosTest/analyzePhotos
                             
                             userIdDetermined = anazlyzeInfo[0]
                             proba = anazlyzeInfo[1]
@@ -240,10 +244,10 @@ def upload_image():
                             
                             if not used_filename(filename):
                                 # used to detect and crop faces in images. Doesnt really improve FR accuracy so it will die here
-                                #image.save(os.path.join(current_app.config["IMAGE_ANALYZE_UPLOAD"], filename))          #Saves analyzed photo to photosTest/analyzePhotos to be used by FR
-                                #detect_faces.detect_face("photosTest/analyzePhotos/" + filename)
-                                #storage.child("images/" + userId + "/" + filename).put("photosTest/analyzePhotos/" + filename, userIdToken)
-                                #os.remove("photosTest/analyzePhotos/" + filename)           # remove the photo from photosTest/analyzePhotos
+                                #image.save(os.path.join(current_app.config["IMAGE_UPLOAD_DIR"], filename))          #Saves analyzed photo to photosTest/analyzePhotos to be used by FR
+                                #detect_faces.detect_face(os.path.join(current_app.config["IMAGE_UPLOAD_DIR"], filename))
+                                #storage.child("images/" + userId + "/" + filename).put(os.path.join(current_app.config["IMAGE_UPLOAD_DIR"], filename), userIdToken)
+                                #os.remove(os.path.join(current_app.config["IMAGE_UPLOAD_DIR"], filename))           # remove the photo from photosTest/analyzePhotos
                                 current_app.logger.info("[UPLOAD-IMAGE] Photo saved and Analyzed by FR")
                                 
                                 #TODO: test the photo the user is uploading and tell them if it is good or not
@@ -269,9 +273,9 @@ def upload_image():
                 print(bcolors.FAIL, "                             [ERROR Described Below]", bcolors.ENDC)
                 current_app.logger.warning("[ERROR - UPLOAD-IMAGE] Error Occured: ")
                 print(bcolors.FAIL, "                             ", err, bcolors.ENDC)
-        else:       
-            #No user logged in
-            current_app.logger.warning("[UPLOAD-IMAGE] No user currently logged in, redirecting moving to [LOGIN]----------------------------------------------------------------------------------")
-            return redirect(url_for('auth.login'))
+    else:       
+        #No user logged in
+        current_app.logger.warning("[UPLOAD-IMAGE] No user currently logged in, redirecting moving to [LOGIN]----------------------------------------------------------------------------------")
+        return redirect(url_for('auth.login'))
     
     return render_template("upload_image.html")
