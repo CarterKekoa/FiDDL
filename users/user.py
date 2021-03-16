@@ -220,13 +220,15 @@ def upload_image():
                         if request.form.get('analyzer') == 'analyze':
                             #Analyze Check box checked. Run FR on uploaded image then
                             # TODO: this save isnt working when deployed. May have to try just passing the image directly
+                            print("1")
                             image.save(os.path.join(current_app.config["IMAGE_UPLOAD_DIR"], filename))          #Saves analyzed photo to photosTest/analyzePhotos to be used by FR
+                            print("2")
                             anazlyzeInfo = recognize.facialRecognition(os.path.join(current_app.config["IMAGE_UPLOAD_DIR"], filename))
                             print(bcolors.OKBLUE, "                             FR analyzed info: ", anazlyzeInfo, bcolors.ENDC)
                             current_app.logger.info("[UPLOAD-IMAGE] Photo saved and Analyzed by FR")
-                            
+                            print("3")
                             os.remove(os.path.join(current_app.config["IMAGE_UPLOAD_DIR"], filename))           # remove the photo from photosTest/analyzePhotos
-                            
+                            print("4")
                             userIdDetermined = anazlyzeInfo[0]
                             proba = anazlyzeInfo[1]
                             print(bcolors.OKBLUE, "                             User recognized (userIdDetermined): ", userIdDetermined, bcolors.ENDC)
