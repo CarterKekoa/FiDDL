@@ -46,8 +46,6 @@ app.config["IMAGE_UPLOAD_DIR"] = os.path.join(app.config["FIDDL_DIR"], "photosTe
 firebase = pyrebase.initialize_app(json.load(open('firebase/firebaseConfig.json')))
 auth = firebase.auth()
 db = firebase.database()                                    
-app.secret_key = os.urandom(24)                                     # random secret key to track if user is logged in
-app.permanent_session_lifetime = timedelta(hours=2)                 # how long permanent session will last, hours,min,days
 storage = firebase.storage()
 
 # Add initializations to sesson to be used by BluePrints
@@ -67,5 +65,8 @@ USER = {
     }
 app.config['USER'] = USER
 
-if __name__ == "__main__":      #if running from command line, turn on dev mode
+if __name__ == "__main__":      
+    #if running from command line, turn on dev mode
+    app.secret_key = os.urandom(24)                                # random secret key to track if user is logged in
+    app.permanent_session_lifetime = timedelta(hours=2)            # how long permanent session will last, hours,min,days
     app.run(debug=True)         #dev mode, server updates on own, shows errors

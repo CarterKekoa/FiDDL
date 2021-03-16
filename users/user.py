@@ -160,6 +160,8 @@ def upload_image():
     print(bcolors.OKBLUE, "                             app.configapp.config[IMAGE_UPLOAD_DIR]: ", current_app.config["IMAGE_UPLOAD_DIR"], bcolors.ENDC)
     
     # Check if a user is already logged in
+    print(bcolors.OKBLUE, "                             session.get('usr') is None: ", session.get('usr') is None, bcolors.ENDC)
+
     if not session.get('usr') is None:
         print()
         current_app.logger.info("[UPLOAD-IMAGE] Upload Image Process Started----------------------------------------------------------------------------------")
