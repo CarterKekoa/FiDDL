@@ -2,25 +2,8 @@ from flask import Blueprint, render_template, session, current_app, request, red
 
 authsBP = Blueprint("auth", __name__, static_folder="static", template_folder="templates")
 
-# Colors for colored terminal prints
-class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+import fiddl_utils as fiddl_utils
 
-def initialize_data():
-    firebase = current_app.config['firebase']
-    auth = current_app.config['auth']
-    db = current_app.config['db']
-    storage = current_app.config['storage']
-    USER = current_app.config['USER']
-    return firebase, auth, db, storage, USER
 
 # User email is verified
 def email_verified_check():
@@ -33,12 +16,12 @@ def login():
     # Check if a user is already logged in
     if not session.get('usr') is None:
         current_app.logger.warning("[LOGIN] A user is already logged in, redirecting moving to [HOME]----------------------------------------------------------------------------------")
-        print(bcolors.WARNING, "                             Loged in user: ", session['localId'], bcolors.ENDC)
+        print(fiddl_utils.bcolors.WARNING, "                             Loged in user: ", session['localId'], fiddl_utils.bcolors.ENDC)
         return redirect(url_for('users.home'))                        #Send to home page
     else:
         # Start Login Process
         current_app.logger.info("[LOGIN] No session['usr'] found (AKA No user currently logged in (Good since logging in): ")
-        firebase, auth, db, storage, USER = initialize_data()
+        firebase, auth, db, storage, bucket = fiddl_utils.initialize_data()
 
         print()
         current_app.logger.info("[LOGIN] Login Process Started----------------------------------------------------------------------------------")
@@ -49,7 +32,7 @@ def login():
                 #Login Button Pressed
                 email = request.form['email']
                 password = request.form['password']
-                print(bcolors.OKBLUE, "                             Entered Email: ", email, " Pass: ", password, bcolors.ENDC)
+                print(fiddl_utils.bcolors.OKBLUE, "                             Entered Email: ", email, " Pass: ", password, fiddl_utils.bcolors.ENDC)
                 #TODO: stay logged in button?
                 try:
                     current_app.logger.info("[LOGIN] Google Authentication Started")
@@ -78,7 +61,7 @@ def login():
                     session['localId'] = user['localId']    # stores the users short Id (This is what their data/photos are stored under)
                     session['email'] = user["email"]        # stores the users email
                     current_app.logger.info("[LOGIN] Session Started with user info stored")
-                    print(bcolors.OKBLUE, "                             Logged in User localId: ", session['localId'], bcolors.ENDC)
+                    print(fiddl_utils.bcolors.OKBLUE, "                             Logged in User localId: ", session['localId'], fiddl_utils.bcolors.ENDC)
 
                     #Grab users name
                     current_app.logger.info("[LOGIN] Google User Data Grab Started")
@@ -89,23 +72,22 @@ def login():
                     for val in data.values():
                         #Grab logining in users name from database. Not necessary here
                         for k,v in val.items():
-                            print(bcolors.OKBLUE, "                             Users Google Data: key: ", k, " value: ", v, bcolors.ENDC)
+                            print(fiddl_utils.bcolors.OKBLUE, "                             Users Google Data: key: ", k, " value: ", v, fiddl_utils.bcolors.ENDC)
                             session[k] = v
                             if k == 'firstName':
                                 good_data = True
                         if good_data:
                             current_app.logger.info("[LOGIN] Google User Data Grab Success")
                         else:
-                            print(bcolors.WARNING, "                             [ERROR Described Below]", bcolors.ENDC)
+                            print(fiddl_utils.bcolors.WARNING, "                             [ERROR Described Below]", fiddl_utils.bcolors.ENDC)
                             current_app.logger.info("[ERROR - LOGIN] Google User Data Grab Fail, check user: ", session['localId'], " database for more info")
                             return redirect(url_for('auth.login'))
                     current_app.logger.info("[LOGIN] Login Process Ended, Moving to [HOME]----------------------------------------------------------------------------------")
                     return redirect(url_for('users.home'))
-                except Exception as err:
+                except:
                     #Login Fail
-                    print(bcolors.FAIL, "                             [ERROR Described Below]", bcolors.ENDC)
                     current_app.logger.info("[ERROR - LOGIN] Error Occured: ")
-                    print(bcolors.FAIL, "                             ", err, bcolors.ENDC)
+                    fiddl_utils.PrintException()
                     current_app.logger.info("[LOGIN] Login Process Ended, restarting [LOGIN]----------------------------------------------------------------------------------")
                     return redirect(url_for('auth.login'))
             elif request.form['button'] == 'registerScreen':
@@ -125,12 +107,12 @@ def register():
     # Check if a user is already logged in
     if not session.get('usr') is None:
         current_app.logger.warning("[REGISTER] A user is already logged in, redirecting moving to [HOME]----------------------------------------------------------------------------------")
-        print(bcolors.WARNING, "                             Loged in user: ", session['localId'], bcolors.ENDC)
+        print(fiddl_utils.bcolors.WARNING, "                             Loged in user: ", session['localId'], fiddl_utils.bcolors.ENDC)
         return redirect(url_for('users.home'))                        #Send to home page
     else:
         # Start Login Process
         current_app.logger.info("[REGISTER] No session['usr'] found (AKA No user currently logged in (Good since registering): ")
-        firebase, auth, db, storage, USER = initialize_data()
+        firebase, auth, db, storage, bucket = fiddl_utils.initialize_data()
 
         print()
         current_app.logger.info("[REGISTER] Registration Process Started----------------------------------------------------------------------------------")
@@ -153,18 +135,17 @@ def register():
                         noPasswordMatch = "Your Passwords did not match. Please try again."
                         flash(noPasswordMatch, "info")                    #"info" is the type of message for more customization if we want, others are warning, info, error
                         return redirect('auth.register')
-                except Exception as err:
+                except:
                     # Register Fail
-                    print(bcolors.FAIL, "                             [ERROR Described Below]", bcolors.ENDC)
                     current_app.logger.warning("[ERROR - REGISTER] Error Occured: ")
-                    print(bcolors.FAIL, "                             ", err, bcolors.ENDC)
+                    fiddl_utils.PrintException()
                     current_app.logger.warning("[REGISTER] Register Process Ended, restarting [REGISTER]----------------------------------------------------------------------------------")
                     fieldsNotFilled = "Issue when trying to grab your entered information. Please make sure to fill in all the fields."
                     flash(fieldsNotFilled, "info")                    #"info" is the type of message for more customization if we want, others are warning, info, error
                     return redirect(url_for('auth.register'))
                 
-                print(bcolors.OKBLUE, "                             Entered Email: ", email, " Pass: ", password, bcolors.ENDC)
-                print(bcolors.OKBLUE, "                             Entered firstName: ", firstName, " lastName: ", lastName, bcolors.ENDC)
+                print(fiddl_utils.bcolors.OKBLUE, "                             Entered Email: ", email, " Pass: ", password, fiddl_utils.bcolors.ENDC)
+                print(fiddl_utils.bcolors.OKBLUE, "                             Entered firstName: ", firstName, " lastName: ", lastName, fiddl_utils.bcolors.ENDC)
                 current_app.logger.info("[REGISTER] User register information grabed.")
 
                 # Registe the user in Google Firebase
@@ -190,7 +171,7 @@ def register():
                     session['firstName'] = firstName
                     session['lastName'] = lastName
                     current_app.logger.info("[REGISTER] Session Started with user info stored")
-                    print(bcolors.OKBLUE, "                             Logged in User localId: ", session['localId'], bcolors.ENDC)
+                    print(fiddl_utils.bcolors.OKBLUE, "                             Logged in User localId: ", session['localId'], fiddl_utils.bcolors.ENDC)
                     
                     #Add data to realtime database
                     data = {
@@ -205,11 +186,10 @@ def register():
                     # Go to Home Page for New User
                     current_app.logger.info("[REGISTER] Registration Process Ended Successfully, Moving to [HOME]----------------------------------------------------------------------------------")
                     return redirect(url_for('users.home'))                                        #Redirect routes
-                except Exception as err:
+                except:
                     # Register Fail
-                    print(bcolors.FAIL, "                             [ERROR Described Below]", bcolors.ENDC)
                     current_app.logger.warning("[ERROR - REGISTER] Error Occured: ")
-                    print(bcolors.FAIL, "                             ", err, bcolors.ENDC)
+                    fiddl_utils.PrintException()
                     current_app.logger.warning("[REGISTER] Registration Process Ended on fail, restarting [REGISTER]----------------------------------------------------------------------------------")
                     return redirect(url_for('auth.register'))
             elif request.form['button'] == 'loginScreen':
@@ -229,9 +209,9 @@ def logout():
     # Check if a user is already logged in
     if not session.get('usr') is None:
         current_app.logger.info("[LOGOUT] A user is logged in, good since logging out")
-        print(bcolors.WARNING, "                             Loged in user: ", session['localId'], bcolors.ENDC)
+        print(fiddl_utils.bcolors.WARNING, "                             Loged in user: ", session['localId'], fiddl_utils.bcolors.ENDC)
         try:
-            firebase, auth, db, storage, USER = initialize_data()
+            firebase, auth, db, storage, bucket = fiddl_utils.initialize_data()
             #Logout User
             auth.current_user = None                        #Logout from firebase Auth
             session.permanent = False 
@@ -239,12 +219,11 @@ def logout():
             current_app.logger.info("[LOGOUT] Google auth the session closed succesfully.")
             logoutSuccess = "You have been succesfully logged out."
             flash(logoutSuccess, "info")                    #"info" is the type of message for more customization if we want, others are warning, info, error
-        except Exception as err:
-                    # Register Fail
-                    print(bcolors.FAIL, "                             [ERROR Described Below]", bcolors.ENDC)
-                    current_app.logger.warning("[ERROR - LOGOUT] Error Occured: ")
-                    print(bcolors.FAIL, "                             ", err, bcolors.ENDC)
-                    current_app.logger.warning("[LOGOUT] Logout Process Ended on fail, restarting at [LOGIN]----------------------------------------------------------------------------------")
+        except:
+            # Register Fail
+            current_app.logger.warning("[ERROR - LOGOUT] Error Occured: ")
+            fiddl_utils.PrintException()
+            current_app.logger.warning("[LOGOUT] Logout Process Ended on fail, restarting at [LOGIN]----------------------------------------------------------------------------------")
     else:
         current_app.logger.info("[LOGOUT] No user logged in, logout impossible.")
     return redirect(url_for('auth.login'))
