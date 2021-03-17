@@ -115,6 +115,7 @@ def facialRecognition(imagePath):
 			print(bcolors.OKCYAN, "[RECOGNIZE] Person Recognized ", bcolors.ENDC)
 			info = [name, (proba * 100)]
 			print(bcolors.OKCYAN, "[RECOGNIZE] Info on recognized person: ", bcolors.ENDC)
+			print()
 	# show the output image
 	#cv2.imshow("Image", image)
 	#cv2.waitKey(0)

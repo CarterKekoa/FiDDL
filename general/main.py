@@ -7,66 +7,34 @@ import FacialRecognition.train_model as train_model
 
 mainBP = Blueprint("general", __name__, static_folder="static", template_folder="templates")
 
-def initialize_data():
-    firebase = current_app.config['firebase']
-    auth = current_app.config['auth']
-    db = current_app.config['db']
-    storage = current_app.config['storage']
-    #storageRef = current_app.config['storageRef']
-    return firebase, auth, db, storage
+# Helper File Imports
+import general.utils as utils
+import fiddl_utils as fiddl_utils
 
-# grabs each users photos and returns their urls in a Dictionary
-def all_users():
-    firebase, auth, db, storage = initialize_data()
-    data = db.child("users").get().val()    # grabs all user TokenIds
-    print("Data: ")
-    print(data.values())
-
-    all_user_photo_locations = {}
-
-    #Parse the returned OrderedDict of data
-    for val in data:
-        #Grab logining in users name from database. Not necessary here
-        all_user_photo_locations[val] = []
-        data2 = db.child("users").child(val).child("photos").get()
-
-        try:
-            data2 = data2.val()
-
-            # data has the id of each photo paired with the actual photo file name
-            # Parse the returned OrderedDict for filenames of user photos
-            #print("data2: " + str(data2))
-            for k,v in data2.items():
-                #storage.child("images/" + userId + "/" + val).download(val, val)           # dowloads image to local folder, testing only
-                print("v: ", v)
-                imageURL = storage.child("images/" + str(val) + "/" + v).get_url(None)      # URL for Google Storage Photo location
-                print("imageURL: ", imageURL)
-                all_user_photo_locations[val].append(imageURL)                 # Stores the URL of each photo for the user
-    
-        except AttributeError:
-            print("This user: '", val, "' has no photos. Skipped")
-        
-    print(all_user_photo_locations)
-    return all_user_photo_locations
 
 # Routes ////////////////////////////////////////____________________________________________
 # Welcome Page ---------------------------------
 @mainBP.route('/', methods=['GET', 'POST'])                                                #@ is a decorator, flask uses this to define its urls, define url with a route
 def welcome():
     #Check if screen buttons are clicked
-    
     if request.method == "POST":
         if request.form['button'] == 'loginScreen':
             return redirect(url_for('auth.login'))
         elif request.form['button'] == 'registerScreen':
             return redirect(url_for('auth.register'))
         elif request.form['button'] == 'trainButton':
-            print("Extract Start ------------------------------------")
-            temp_all_users_dict = all_users()
-            extract_embeddings.create_embeddings(temp_all_users_dict)
-            train_model.train()
-            modelsTrained = "New Facial Recognition models succesfully computed. Any new users and images are now included."
-            flash(modelsTrained, "info")                    #"info" is the type of message for more customization if we want, others are warning, info, error
+            current_app.logger.info("[WELCOME] Training FR Models based on current users and photos available...")
+            try:
+                current_app.logger.info("[WELCOME] Training Models...")
+                temp_all_users_dict = utils.all_users()
+                extract_embeddings.create_embeddings(temp_all_users_dict)
+                train_model.train()
+                current_app.logger.info("[WELCOME] Models Trained")
+                modelsTrained = "New Facial Recognition models succesfully computed. Any new users and images are now included."
+                flash(modelsTrained, "info")                    #"info" is the type of message for more customization if we want, others are warning, info, error
+            except:
+                current_app.logger.info("[ERROR - WELCOME] Error Occured...")
+                fiddl_utils.PrintException()
             return redirect(url_for('general.welcome'))
     elif request.method == "GET":
         return render_template('welcome.html')                    #must be in directory (folder) names templates, grabs file form there

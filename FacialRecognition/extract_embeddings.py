@@ -14,21 +14,20 @@ import urllib.request
 import certifi
 import requests
 
+import fiddl_utils as fiddl_utils
+
 def create_embeddings(locations_dict):
+	print()
 	# load our serialized face detector from disk
-	print("[INFO] loading face detector...")
+	print(fiddl_utils.bcolors.OKCYAN, "[EXTRACT_EMBEDDINGS] loading face detector... ", fiddl_utils.bcolors.ENDC)
 	protoPath = os.path.sep.join(["face_detection_model", "deploy.prototxt"])
 	modelPath = os.path.sep.join(["face_detection_model",
 		"res10_300x300_ssd_iter_140000.caffemodel"])
 	detector = cv2.dnn.readNetFromCaffe(protoPath, modelPath)
-	print("protopath: " + str(protoPath))
-	print("modelpath: " + str(modelPath))
-	print("detector: " + str(detector))
 
 	# load our serialized face embedding model from disk
-	print("[INFO] loading face recognizer...")
+	print(fiddl_utils.bcolors.OKCYAN, "[EXTRACT_EMBEDDINGS] loading face recognizer...", fiddl_utils.bcolors.ENDC)
 	embedder = cv2.dnn.readNetFromTorch("openface_nn4.small2.v1.t7")
-	print("embedder: " + str(embedder))
 
 	# grab the paths to the input images in our dataset
 	#print("[INFO] quantifying faces...")
@@ -44,46 +43,41 @@ def create_embeddings(locations_dict):
 
 	# initialize the total number of faces processed
 	total = 0
-	count = 0
-
-	# loop over the image paths
-	print("[INFO] quantifying faces...")
+	
+	print(fiddl_utils.bcolors.OKCYAN, "[EXTRACT_EMBEDDINGS] quantifying faces...", fiddl_utils.bcolors.ENDC)
+	# for users in location dictionary
 	for key in locations_dict.keys():
-			print("key: " + key)
+		
+		print(fiddl_utils.bcolors.OKCYAN, "		User Being Embedded: ", key, fiddl_utils.bcolors.ENDC)
+		# for photo url in the dictionary for that user
+		#print("loc:", locations_dict[key])
+		if len(locations_dict[key]) == 0:
+			print(fiddl_utils.bcolors.OKCYAN, "			User Has no photos, next: ", key, fiddl_utils.bcolors.ENDC)
+		else:
+			img_count = 1
 			for val in locations_dict[key]:
-				print("val: " + val)
-
-				print("Image Loop Start------------------------------------------------------------------")
+				#print("val: " + val)
 				# extract the person name from the image path
-				print("[INFO] processing image {}/{}".format(count + 1,
-					len(locations_dict[key])))
+				print(fiddl_utils.bcolors.OKCYAN, "[EXTRACT_EMBEDDINGS] processing image {}/{}".format(img_count,
+					len(locations_dict[key])), fiddl_utils.bcolors.ENDC)
 				#name = imagePath.split(os.path.sep)[-2]	#name is passed in instead
 				name = key			# set name to id of the person in photos
 				
 				# load the image, resize it to have a width of 600 pixels (while
 				# maintaining the aspect ratio), and then grab the image
 				# dimensions
-				
-				print("val: " + val)
 				#resp = requests.get(val, stream=True).raw
 				
+				# try grabbing the image from url
 				try:
-
-					resp = urllib.request.urlopen(val)
-					#print("resp: ",resp)
-					image = np.asarray(bytearray(resp.read()), dtype="uint8")
-					#print("image0: ", type(image))
-					#TODO: get the image url to be able to be read by cv2.imread
-					image = cv2.imdecode(image, cv2.IMREAD_COLOR)
-					#print("image1: ", type(image))
+					resp = urllib.request.urlopen(val)	# open the url image
+					image = np.asarray(bytearray(resp.read()), dtype="uint8")	# make it a np byte array
+					# get the image url to be able to be read by cv2.imread
+					image = cv2.imdecode(image, cv2.IMREAD_COLOR) # decodes the image and keeps the coloring
 					#image = cv2.imencode(".png", image)
 					
-					
-					
 					#image = cv2.imread(image)
-					#print("image2: " + str(image))
-					image = imutils.resize(image, width=600)
-					#print("image3: " + str(image))
+					image = imutils.resize(image, width=600)	# resize the image. all FR done on width 600
 					(h, w) = image.shape[:2]
 
 					# construct a blob from the image
@@ -133,18 +127,20 @@ def create_embeddings(locations_dict):
 							knownNames.append(name)
 							knownEmbeddings.append(vec.flatten())
 							total += 1
-					count += 1
-					print("Image Loop End------------------------------------------------------------------")
-				except urllib.error.HTTPError:
-					print("[ERROR] Bad URL. Ignored.")
+				except:
+					print("[ERROR - EXTRACT_EMBEDDINGS]: Error Occurred")
+					fiddl_utils.PrintException()
+				img_count += 1
+	print(fiddl_utils.bcolors.OKCYAN, "[EXTRACT_EMBEDDINGS]: Finished Extracting Photo Embeddings", key, fiddl_utils.bcolors.ENDC)
 
 	# dump the facial embeddings + names to disk
-	print("[INFO] serializing {} encodings...".format(total))
+	print(fiddl_utils.bcolors.OKCYAN, "[[EXTRACT_EMBEDDINGS]] serializing {} encodings...".format(total), fiddl_utils.bcolors.ENDC)
+	print()
 	data = {"embeddings": knownEmbeddings, "names": knownNames}
-	print("DATA: ", data)
+	#print("DATA: ", data)
 	f = open("output/embeddings.pickle", "wb")
-	print("F: ", f)
 	f.write(pickle.dumps(data))
+	data = pickle.loads(open("output/embeddings.pickle", "rb").read())
 	f.close()
 
 
