@@ -206,7 +206,7 @@ def upload_image():
                             #Images being uploaded to db instead
                             current_app.logger.info("[UPLOAD-IMAGE] Photo is being uploaded to users database...")
                             
-                            if not used_filename(filename):
+                            if not utils.used_filename(filename):
                                 # used to detect and crop faces in images. Doesnt really improve FR accuracy so it will die here
                                 #image.save(os.path.join(current_app.config["IMAGE_UPLOAD_DIR"], filename))          #Saves analyzed photo to photosTest/analyzePhotos to be used by FR
                                 #detect_faces.detect_face(os.path.join(current_app.config["IMAGE_UPLOAD_DIR"], filename))
