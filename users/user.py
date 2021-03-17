@@ -212,7 +212,7 @@ def upload_image():
                         #userId = auth.current_user['localId']               #auth.current_user is how we get the current users data, userId is so each user has their own photo folder
                         print(bcolors.OKBLUE, "                             session['localId']: ", session['localId'], bcolors.ENDC)
                         #userIdToken = auth.current_user['idToken']
-                        userIdToken = session['usr']
+                        userIdToken = session['localId']
                         #print(bcolors.OKBLUE, "                             userIdToken: ", userIdToken, bcolors.ENDC)
 
                         image.seek(0)                               #NEED THIS! We point to the end of the file above to find the size, this causes a empty file to upload without this fix
