@@ -31,8 +31,9 @@ def initialize_data():
     auth = current_app.config['auth']
     db = current_app.config['db']
     storage = current_app.config['storage']
-    USER = current_app.config['USER']
-    return firebase, auth, db, storage, USER
+    #storageRef = current_app.config['storageRef']
+    bucket = current_app.config['bucket'] 
+    return firebase, auth, db, storage, bucket
    
 # Check if image is allowed function
 def allow_image(filename):
@@ -87,22 +88,18 @@ def home():
         current_app.logger.info("[HOME] Home Process Started----------------------------------------------------------------------------------")
         current_app.logger.info("[HOME] A user is logged in, continue.")
         print(bcolors.OKBLUE, "                             Loged in user: ", session['localId'], bcolors.ENDC)
-        firebase, auth, db, storage, USER = initialize_data()
-        print("1")
+        firebase, auth, db, storage, bucket = initialize_data()
         try:
             #userId = auth.current_user['localId']               #auth.current_user is how we get the current users data
-            print("2")
             photo_names_in_db = {}  # will be popluated with all of the users uploaded photo names
             images = []             # will store the urls of the users photos
             image_names = []        # will simply store the images names that exist in the users database
-            print("3")
             current_app.logger.info("[HOME] Attempting to grab users database information...")
+            
             #Grab users name
             user = db.child("users").child(session['localId']).get().val()
-            print("4")
             #Parse the returned OrderedDict of data
             for val in user.values():
-                print("5")
                 #Grab logining in users name from database. Not necessary here
                 for k,v in val.items():
                     #print(k,v)
@@ -141,9 +138,13 @@ def home():
                 #Add new photo button
                 current_app.logger.info("[HOME] Switching to [UPLOAD-IMAGE]----------------------------------------------------------------------------------")
                 return redirect(url_for('users.upload_image'))
-            elif request.form['button'] == 'updateMyHome':
-                #TODO: make this for editing user info
-                render_template('/home')
+            elif request.form['button'] == 'editPhotosButton':
+                print("1")
+                
+                editPhotos = True
+                render_template("home.html", editPhotos = editPhotos)
+                im_urls = session["userImageURLs"]
+                im_names = session["justPhotoNames"]
             elif request.form['button'] == 'logoutButton':
                 #Logout Button
                 current_app.logger.info("[HOME] Loggin Out, switching to [LOGOUT]----------------------------------------------------------------------------------")
@@ -171,7 +172,7 @@ def upload_image():
         current_app.logger.info("[UPLOAD-IMAGE] A user is logged in, continue.")
         print(bcolors.OKBLUE, "                             Loged in user: ", session['localId'], bcolors.ENDC)
 
-        firebase, auth, db, storage, USER = initialize_data()
+        firebase, auth, db, storage, bucket = initialize_data()
         
         if request.method == "POST":
             try:
@@ -219,15 +220,32 @@ def upload_image():
                         #Check if to run FR or Store photo
                         if request.form.get('analyzer') == 'analyze':
                             #Analyze Check box checked. Run FR on uploaded image then
-                            # TODO: this save isnt working when deployed. May have to try just passing the image directly
-                            print("1")
-                            image.save(os.path.join(current_app.config["IMAGE_UPLOAD_DIR"]))          #Saves analyzed photo to photosTest/analyzePhotos to be used by FR
-                            print("2")
-                            anazlyzeInfo = recognize.facialRecognition(os.path.join(current_app.config["IMAGE_UPLOAD_DIR"], filename))
+                            # TODO: save to database temporarily duh
+                            try:
+                                current_app.logger.info("[UPLOAD-IMAGE] Temp. saving to database and analyzing")
+                                storage.child("images/temp/" + filename).put(image, userIdToken)
+                                current_app.logger.info("[UPLOAD-IMAGE] Photo saved, grabbing url")
+                                imageURL = storage.child("images/temp/" + filename).get_url(None)
+                                
+                                anazlyzeInfo = recognize.facialRecognition(imageURL)
+                                
+                                delete_temp_image_path = "images/temp/" + filename
+                                blob = bucket.blob(delete_temp_image_path)
+                                print(bcolors.OKBLUE, "                             Image Blob being deleted: ", blob, bcolors.ENDC)
+                                blob.delete()
+                                current_app.logger.info("[UPLOAD-IMAGE] Photo Analyzed and deleted from temporary storage")
+                            except Exception as err:
+                                # Analyze Fail
+                                print(bcolors.FAIL, "                             [ERROR Described Below]", bcolors.ENDC)
+                                current_app.logger.warning("[ERROR - ANALYZE] Error Occured: ")
+                                print(bcolors.FAIL, "                             ", err, bcolors.ENDC)
+    
+                            #image.save(os.path.join(current_app.config["IMAGE_UPLOAD_DIR"]))          #Saves analyzed photo to photosTest/analyzePhotos to be used by FR
+                            #anazlyzeInfo = recognize.facialRecognition(os.path.join(current_app.config["IMAGE_UPLOAD_DIR"], filename))
                             print(bcolors.OKBLUE, "                             FR analyzed info: ", anazlyzeInfo, bcolors.ENDC)
                             current_app.logger.info("[UPLOAD-IMAGE] Photo saved and Analyzed by FR")
                             print("3")
-                            os.remove(os.path.join(current_app.config["IMAGE_UPLOAD_DIR"], filename))           # remove the photo from photosTest/analyzePhotos
+                            #os.remove(os.path.join(current_app.config["IMAGE_UPLOAD_DIR"], filename))           # remove the photo from photosTest/analyzePhotos
                             print("4")
                             userIdDetermined = anazlyzeInfo[0]
                             proba = anazlyzeInfo[1]
@@ -235,10 +253,10 @@ def upload_image():
                             print(bcolors.OKBLUE, "                             Confidence (probability): ", proba, bcolors.ENDC)
                             
                             if userIdDetermined.lower() == session['localId'].lower():
+                                current_app.logger.info("[UPLOAD-IMAGE] Person recognized as logged in user")
                                 # Unlocks the door while the user is logged in
                                 smartlock.unlock()
-                                print(userIdDetermined + " " + session['localId'])
-                                current_app.logger.info("[UPLOAD-IMAGE] Photo recognized as logged in user.")
+                                current_app.logger.warning("[UPLOAD-IMAGE] Door Unlocked")
                                 userNameDetermined = session["firstName"]
                                 print(bcolors.OKBLUE, "                             User Recognized as: ", userNameDetermined, bcolors.ENDC)
                             else:

@@ -19,8 +19,9 @@ def initialize_data():
     auth = current_app.config['auth']
     db = current_app.config['db']
     storage = current_app.config['storage']
-    USER = current_app.config['USER']
-    return firebase, auth, db, storage, USER
+    #storageRef = current_app.config['storageRef']
+    bucket = current_app.config['bucket'] 
+    return firebase, auth, db, storage, bucket
 
 # User email is verified
 def email_verified_check():
@@ -38,7 +39,7 @@ def login():
     else:
         # Start Login Process
         current_app.logger.info("[LOGIN] No session['usr'] found (AKA No user currently logged in (Good since logging in): ")
-        firebase, auth, db, storage, USER = initialize_data()
+        firebase, auth, db, storage, bucket = initialize_data()
 
         print()
         current_app.logger.info("[LOGIN] Login Process Started----------------------------------------------------------------------------------")
@@ -130,7 +131,7 @@ def register():
     else:
         # Start Login Process
         current_app.logger.info("[REGISTER] No session['usr'] found (AKA No user currently logged in (Good since registering): ")
-        firebase, auth, db, storage, USER = initialize_data()
+        firebase, auth, db, storage, bucket = initialize_data()
 
         print()
         current_app.logger.info("[REGISTER] Registration Process Started----------------------------------------------------------------------------------")
@@ -231,7 +232,7 @@ def logout():
         current_app.logger.info("[LOGOUT] A user is logged in, good since logging out")
         print(bcolors.WARNING, "                             Loged in user: ", session['localId'], bcolors.ENDC)
         try:
-            firebase, auth, db, storage, USER = initialize_data()
+            firebase, auth, db, storage, bucket = initialize_data()
             #Logout User
             auth.current_user = None                        #Logout from firebase Auth
             session.permanent = False 

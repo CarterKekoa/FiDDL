@@ -3,10 +3,13 @@ from flask.globals import request
 from flask.templating import render_template_string
 from jws import verify                                                  #import flask libries, render_template is so we can make front end
 import pyrebase
+from pyrebase.pyrebase import storage  
+import firebase_admin
+from firebase_admin import storage as admin_storage, credentials, firestore
 from collections import OrderedDict
 import os
 import imghdr
-from pyrebase.pyrebase import Storage                                    #for images
+
 from werkzeug.utils import secure_filename                               #takes a file name and returns a secure version of it
 import subprocess
 from datetime import timedelta                                          # used for permanent sessions
@@ -47,18 +50,26 @@ app.config["IMAGE_UPLOAD_DIR"] = os.path.join(app.config["FIDDL_DIR"], "photosTe
 firebase = pyrebase.initialize_app(json.load(open('firebase/firebaseConfig.json')))
 auth = firebase.auth()
 db = firebase.database()                                    
-storage = firebase.storage()
+fb_storage = firebase.storage()
+
+cred = credentials.Certificate(json.load(open('firebase/fiddl-dev-firebase-adminsdk-80a9k-10d924f0ef.json')))
+admin = firebase_admin.initialize_app(cred, {
+    'storageBucket': 'fiddl-dev.appspot.com'
+})
+bucket = admin_storage.bucket()
+
+# Add initializations to sesson to be used by BluePrints
+app.config['firebase'] = firebase
+app.config['auth'] = auth
+app.config['db'] = db
+app.config['storage'] = fb_storage
+app.config['bucket'] = bucket
 
 #if running from command line, turn on dev mode
 if not os.environ.get('SECRET_KEY') is None:
     app.secret_key = os.environ["SECRET_KEY"]                  # To get Heroku Envrionment Variable
 app.permanent_session_lifetime = timedelta(hours=2)            # how long permanent session will last, hours,min,days
 
-# Add initializations to sesson to be used by BluePrints
-app.config['firebase'] = firebase
-app.config['auth'] = auth
-app.config['db'] = db
-app.config['storage'] = storage
 
 # Initialize USER as a global dictionary
 USER = {

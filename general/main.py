@@ -12,12 +12,12 @@ def initialize_data():
     auth = current_app.config['auth']
     db = current_app.config['db']
     storage = current_app.config['storage']
-    USER = current_app.config['USER']
-    return firebase, auth, db, storage, USER
+    #storageRef = current_app.config['storageRef']
+    return firebase, auth, db, storage
 
 # grabs each users photos and returns their urls in a Dictionary
 def all_users():
-    firebase, auth, db, storage, USER = initialize_data()
+    firebase, auth, db, storage = initialize_data()
     data = db.child("users").get().val()    # grabs all user TokenIds
     print("Data: ")
     print(data.values())

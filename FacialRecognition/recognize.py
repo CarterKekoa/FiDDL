@@ -12,18 +12,31 @@ import imutils
 import pickle
 import cv2			#pip3 install opencv-python	#pip3 install scikit-learn==0.23.2
 import os
+import urllib.request
 
+# Colors for colored terminal prints
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
 
 def facialRecognition(imagePath):
 	# load our serialized face detector from disk
-	print("[INFO] loading face detector...")
+	print()
+	print(bcolors.OKCYAN, "[RECOGNIZE] loading face detector... ", bcolors.ENDC)
 	protoPath = os.path.sep.join(["face_detection_model", "deploy.prototxt"])
 	modelPath = os.path.sep.join(["face_detection_model",
 		"res10_300x300_ssd_iter_140000.caffemodel"])
 	detector = cv2.dnn.readNetFromCaffe(protoPath, modelPath)
 
 	# load our serialized face embedding model from disk
-	print("[INFO] loading face recognizer...")
+	print(bcolors.OKCYAN, "[RECOGNIZE] loading face recognizer... ", bcolors.ENDC)
 	embedder = cv2.dnn.readNetFromTorch("openface_nn4.small2.v1.t7")
 
 	# load the actual face recognition model along with the label encoder
@@ -32,8 +45,16 @@ def facialRecognition(imagePath):
 
 	# load the image, resize it to have a width of 600 pixels (while
 	# maintaining the aspect ratio), and then grab the image dimensions
-	image = cv2.imread(imagePath)
-	image = imutils.resize(image, width=600)
+	#image = cv2.imread(imagePath)
+
+	#TODO: Image can now be read when a url image
+	print(bcolors.OKCYAN, "[RECOGNIZE] loading image... ", bcolors.ENDC)
+	resp = urllib.request.urlopen(imagePath)	# open the url
+	image = np.asarray(bytearray(resp.read()), dtype="uint8") # turn into bytearray image
+	image = cv2.imdecode(image, cv2.IMREAD_COLOR) # decode the byte arrays colors into an image that can be used
+	#image = cv2.imencode(".png", image) # old way with image
+
+	image = imutils.resize(image, width=600)	# resize the image TODO: maybe this is why the cropped version want working? alwasy resizing
 	(h, w) = image.shape[:2]
 
 	# construct a blob from the image
@@ -54,6 +75,7 @@ def facialRecognition(imagePath):
 
 		# filter out weak detections
 		if confidence > 0.5:
+			print(bcolors.OKCYAN, "[RECOGNIZE] Person Detected ", bcolors.ENDC)
 			# compute the (x, y)-coordinates of the bounding box for the
 			# face
 			box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
@@ -90,9 +112,9 @@ def facialRecognition(imagePath):
 			cv2.putText(image, text, (startX, y),
 				cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
 			
+			print(bcolors.OKCYAN, "[RECOGNIZE] Person Recognized ", bcolors.ENDC)
 			info = [name, (proba * 100)]
-			#TODO: image is an array here
-			#render_template("upload_image.html", i=image)
+			print(bcolors.OKCYAN, "[RECOGNIZE] Info on recognized person: ", bcolors.ENDC)
 	# show the output image
 	#cv2.imshow("Image", image)
 	#cv2.waitKey(0)

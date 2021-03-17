@@ -22,10 +22,19 @@
     <div></div>
     <div>
         <h2>Photos in {{firstName}}'s Database</h2>
+        <form action="/logout" method="POST">
+            <label>Nav Bar</label>
+            <button type="submit" name="button" value="logoutButton">Logout</button>
+        </form>
+        
         <div>
+            <form method="POST">
+                <button class="home editphotos" type="submit" name="button" value="editPhotosButton" method="POST">Edit Photos</button>
+            </form>
             {% for urls in images %}
                 <!--{{urls}}-->
                 <img src={{urls}} width="200" height="200">
+                
             {% endfor %}
         </div>
         <div>
