@@ -38,7 +38,7 @@ def recieve_message_handler():
 
 # TODO: have this done automatically and change the file location
 # $env:GOOGLE_APPLICATION_CREDENTIALS="C:\Users\Drew\iCloudDrive\Documents\senior design\fiddl-1604901867274-1d28c44d691d.json"
-
+"""
 DEVICE_ID = 'AVPHwEvDLJQsZiLE6-AA7XH4J3OLKg5pqUIh69kYCOlASNxvmDK0IRRa0bjHoNEWLLoHiOanMP1stHjUXVspoNc0DG1luQ'
 CLIENT_ID = '94523447905-vo4v1a5613fj3ep5p8s29vemet0bqnmt.apps.googleusercontent.com'
 CLIENT_SECRET = '0eJ1_AS1KltV0hrSFWAGvIGX'
@@ -184,11 +184,4 @@ def get_rtsp_stream():
     stream_extension_token = results['streamExtensionToken']
     expiration_time = results['expiresAt']
     return rstp_url
-
-@nestBP.route('/doorbell', methods=["GET", "POST"])
-def nest():
-    print("Doorbell function")
-    #firebase, auth, db, storage, bucket = fiddl_utils.initialize_data()
-    pull_messages()
-
-    return render_template('doorbell.html')
+"""
