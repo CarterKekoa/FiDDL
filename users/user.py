@@ -4,6 +4,8 @@ from werkzeug.utils import secure_filename       #takes a file name and returns 
 import smartlock
 from PIL import Image
 import cv2
+import json
+import base64
 
 # Helper File Imports
 import users.utils as utils
@@ -17,6 +19,26 @@ import FacialRecognition.detect_faces as detect_faces
 
 userBP = Blueprint("users", __name__, static_folder="static", template_folder="templates")
 
+@userBP.route('/doorbell', methods=["POST"])
+def recieve_message_handler():
+    print("--------------------")
+    envelope = json.loads(request.data.decode('utf-8'))
+    print("envelope", envelope)
+    payload = base64.b64decode(envelope['message']['data'])
+    print("payload", payload)
+    # Returning any 2xx status indicates successful receipt of the message.
+    return 'OK', 200
+
+"""
+@userBP.route('/doorbell', methods=["GET", "POST"])
+def nest():
+    print("Doorbell function")
+    #firebase, auth, db, storage, bucket = fiddl_utils.initialize_data()
+    utils.pull_messages()
+    print("Messages pulled succesfully")
+
+    return redirect(url_for('users.home'))
+"""
 
 # Home Page ---------------------------------------------------------------------------------------------------
 @userBP.route('/home', methods=["GET", "POST"])
@@ -85,6 +107,10 @@ def home():
                 render_template("home.html", editPhotos = editPhotos)
                 im_urls = session["userImageURLs"]
                 im_names = session["justPhotoNames"]
+            elif request.form['input'] == 'pullNestMessagesButton':
+                # TODO: Doorbell
+                print("Pull nest messages button clicked")
+                return redirect(url_for('users.nest'))
             elif request.form['button'] == 'logoutButton':
                 #Logout Button
                 current_app.logger.info("[HOME] Loggin Out, switching to [LOGOUT]----------------------------------------------------------------------------------")

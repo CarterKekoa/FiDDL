@@ -8,6 +8,7 @@
     <form action="/logout" method="POST">
         <label>Nav Bar</label>
         <button type="submit" name="button" value="logoutButton">Logout</button>
+
     </form>
 
     <div class="container">
@@ -19,7 +20,10 @@
         </form>
     </div>
 
-    <div></div>
+    <form action="/doorbell" method="post">
+        <button class="doorbell pullNestMessages" type="submit" name="button" value="pullNestMessagesButton">Pull Nest Messages</button>
+    </form>
+
     <div>
         <h2>Photos in {{firstName}}'s Database</h2>
         <div>
