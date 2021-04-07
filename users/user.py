@@ -19,16 +19,6 @@ import FacialRecognition.detect_faces as detect_faces
 
 userBP = Blueprint("users", __name__, static_folder="static", template_folder="templates")
 
-@userBP.route('/doorbell', methods=["POST"])
-def recieve_message_handler():
-    print("--------------------")
-    envelope = json.loads(request.data.decode('utf-8'))
-    print("envelope", envelope)
-    payload = base64.b64decode(envelope['message']['data'])
-    print("payload", payload)
-    # Returning any 2xx status indicates successful receipt of the message.
-    return 'OK', 200
-
 """
 @userBP.route('/doorbell', methods=["GET", "POST"])
 def nest():

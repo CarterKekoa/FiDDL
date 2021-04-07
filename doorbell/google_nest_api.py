@@ -10,10 +10,11 @@
 #       uses the eventId to call get_image(eventId)
 #   get_image(eventId) retrieves the image and saves it to the desired location using the eventId
 
-from flask import Blueprint, current_app, render_template
+from flask import Blueprint, current_app, render_template, request
 import requests
 import json
 import os
+import base64
 
 # Helper File Imports
 import users.utils as utils
@@ -24,6 +25,16 @@ import fiddl_utils as fiddl_utils
 from google.cloud import pubsub_v1
 
 nestBP = Blueprint("doorbell", __name__, static_folder="static", template_folder="templates")
+
+@nestBP.route('/doorbell', methods=["POST"])
+def recieve_message_handler():
+    print("--------------------")
+    envelope = json.loads(request.data.decode('utf-8'))
+    print("envelope", envelope)
+    payload = base64.b64decode(envelope['message']['data'])
+    print("payload", payload)
+    # Returning any 2xx status indicates successful receipt of the message.
+    return 'OK', 200
 
 # TODO: have this done automatically and change the file location
 # $env:GOOGLE_APPLICATION_CREDENTIALS="C:\Users\Drew\iCloudDrive\Documents\senior design\fiddl-1604901867274-1d28c44d691d.json"
