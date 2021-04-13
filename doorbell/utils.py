@@ -50,7 +50,7 @@ def callback(message):
         print("3")
     else:
         print("4")
-        return None, None, None
+        return
 
     # delete the message from the Google Cloud Platform queue
     current_app.logger.info("[DOORBELL] Message Acknowledged")
