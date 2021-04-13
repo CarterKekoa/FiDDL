@@ -32,7 +32,7 @@ def handle_payload(payload):
         
         response = requests.get(image_url, headers=headers, stream=True)
         storage.child("images/nestDoorbell/" + event_id).put(response.content)
-        imageURL = storage.child("images/temp/" + event_id).get_url(None)
+        imageURL = storage.child("images/nestDoorbell/" + event_id).get_url(None)
         current_app.logger.info("[DOORBELL] Image Saved to Database Succesfully")
         print(fiddl_utils.bcolors.OKBLUE, "                             Database Image URL: ", imageURL, fiddl_utils.bcolors.ENDC)
 
@@ -95,4 +95,4 @@ def recieve_message_handler():
 
 @nestBP.route('/doorbell/image', methods=["GET",  "POST"])
 def show_success():
-    return render_template('doorbell.html', image=IMAGE_URL, IdDetermined=ID_DETERMINED, proba=PROBA)
+    return render_template('doorbell.html')
