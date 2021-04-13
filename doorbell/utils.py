@@ -39,6 +39,7 @@ def callback(message):
     sound = 'sdm.devices.events.CameraSound.Sound'
     event = chime
 
+    info = []
     print("1")
     # using 'sdm.devices.events.CameraPerson.Person' to get person events only
     if event in event_type:
@@ -47,20 +48,17 @@ def callback(message):
         event_id = event_type[event]['eventId']
         print(fiddl_utils.bcolors.OKGREEN, "                             Event Id: ", event_id, fiddl_utils.bcolors.ENDC)
         image_url, event_token, headers = get_image(event_id) # get the image
-        print("3")
-    else:
-        print("4")
-        return
+        info.append(image_url, event_token, headers)
+        print()
+        print("5")
+        print("image_url: ",image_url)
+        print("event_token: ",event_token)
+        print("headers: ", headers)
 
     # delete the message from the Google Cloud Platform queue
-    current_app.logger.info("[DOORBELL] Message Acknowledged")
-    # message.ack()
-    print()
-    print("5")
-    print("image_url: ",image_url)
-    print("event_token: ",event_token)
-    print("headers: ", headers)
-    return image_url, event_token, headers
+    #current_app.logger.info("[DOORBELL] Message Acknowledged")
+    #message.ack()
+    return info
 
 # ----------------------------------------------------------------------------
 # Grabs the Doorbell Events Image URL

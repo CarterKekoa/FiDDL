@@ -31,9 +31,13 @@ def recieve_message_handler():
 
 
     current_app.logger.info("[DOORBELL] Payload received, Passing to Google Nest API functions")
-    image_url, event_token, headers = utils.callback(payload)
+    event_info = utils.callback(payload)
     
-    if (image_url != None):
+    if(event_info):
+        print("7")
+        image_url = event_info[0]
+        event_token = event_info[1]
+        headers = event_info[2]
         firebase, auth, db, storage, bucket = fiddl_utils.initialize_data()
         current_app.logger.info("[DOORBELL] Storing Event Image in Database")
         
