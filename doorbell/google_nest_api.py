@@ -19,26 +19,7 @@ ID_DETERMINED = None
 PROBA = None
 PAYLOAD = None
 
-@nestBP.route('/doorbell', methods=["POST"])
-def recieve_message_handler():
-    print()
-    current_app.logger.info("[DOORBELL] Doorbell Event Found----------------------------------------------------------------------------------")
-    current_app.logger.info("[DOORBELL] Google Cloud Platform has sent (pushed) to us a message from the doorbell")
-
-    envelope = json.loads(request.data.decode('utf-8'))
-    print(fiddl_utils.bcolors.OKGREEN, "                             [Nest Doorbell] \n JSON Envelope: ", envelope, fiddl_utils.bcolors.ENDC)
-    payload = base64.b64decode(envelope['message']['data'])
-    print(fiddl_utils.bcolors.OKGREEN, "                             JSON Payload: ", payload, fiddl_utils.bcolors.ENDC)
-    print("0")
-    PAYLOAD = payload
-    print("0.1")
-    
-    current_app.logger.info("[DOORBELL] Acknowledging Message")
-    print("0.2")
-    return 'OK', 200, redirect(url_for('doorbell.show_success'))
-
-@nestBP.route('/doorbell/image', methods=["GET",  "POST"])
-def show_success():
+def handle_payload():
     current_app.logger.info("[DOORBELL] Payload received, Passing to Google Nest API functions")
     print("1")
     event_info = []
@@ -99,4 +80,25 @@ def show_success():
 
         # Returning any 2xx status indicates successful receipt of the message.
     print("8")
+
+@nestBP.route('/doorbell', methods=["POST"])
+def recieve_message_handler():
+    print()
+    current_app.logger.info("[DOORBELL] Doorbell Event Found----------------------------------------------------------------------------------")
+    current_app.logger.info("[DOORBELL] Google Cloud Platform has sent (pushed) to us a message from the doorbell")
+
+    envelope = json.loads(request.data.decode('utf-8'))
+    print(fiddl_utils.bcolors.OKGREEN, "                             [Nest Doorbell] \n JSON Envelope: ", envelope, fiddl_utils.bcolors.ENDC)
+    payload = base64.b64decode(envelope['message']['data'])
+    print(fiddl_utils.bcolors.OKGREEN, "                             JSON Payload: ", payload, fiddl_utils.bcolors.ENDC)
+    print("0")
+    PAYLOAD = payload
+    print("0.1")
+    handle_payload()
+    current_app.logger.info("[DOORBELL] Acknowledging Message")
+    print("0.2")
+    return 'OK', 200
+
+@nestBP.route('/doorbell/image', methods=["GET",  "POST"])
+def show_success():
     return render_template('doorbell.html', image=IMAGE_URL, IdDetermined=ID_DETERMINED, proba=PROBA)
