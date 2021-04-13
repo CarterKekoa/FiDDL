@@ -47,7 +47,11 @@ def callback(message):
 
     # delete the message from the Google Cloud Platform queue
     current_app.logger.info("[DOORBELL] Message Acknowledged")
-    message.ack()
+    # message.ack()
+    print()
+    print("image_url: ",image_url)
+    print("event_token: ",event_token)
+    print("headers: ", headers)
     return image_url, event_token, headers
 
 # ----------------------------------------------------------------------------
