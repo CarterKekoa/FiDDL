@@ -44,6 +44,8 @@ def callback(message):
         event_id = event_type[event]['eventId']
         print(fiddl_utils.bcolors.OKGREEN, "                             Event Id: ", event_id, fiddl_utils.bcolors.ENDC)
         image_url, event_token, headers = get_image(event_id) # get the image
+    else:
+        return None, None, None
 
     # delete the message from the Google Cloud Platform queue
     current_app.logger.info("[DOORBELL] Message Acknowledged")

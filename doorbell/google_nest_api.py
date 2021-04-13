@@ -32,55 +32,56 @@ def recieve_message_handler():
 
     current_app.logger.info("[DOORBELL] Payload received, Passing to Google Nest API functions")
     image_url, event_token, headers = utils.callback(payload)
-
-    firebase, auth, db, storage, bucket = fiddl_utils.initialize_data()
-    current_app.logger.info("[DOORBELL] Storing Event Image in Database")
     
-    response = requests.get(image_url, headers=headers, stream=True)
-    storage.child("images/nestDoorbell/" + event_token).put(response.content)
-    imageURL = storage.child("images/temp/" + event_token).get_url(None)
-    IMAGE_URL = imageURL
-    current_app.logger.info("[DOORBELL] Image Saved to Database Succesfully")
-    print(fiddl_utils.bcolors.OKBLUE, "                             Database Image URL: ", imageURL, fiddl_utils.bcolors.ENDC)
+    if (image_url != None):
+        firebase, auth, db, storage, bucket = fiddl_utils.initialize_data()
+        current_app.logger.info("[DOORBELL] Storing Event Image in Database")
+        
+        response = requests.get(image_url, headers=headers, stream=True)
+        storage.child("images/nestDoorbell/" + event_token).put(response.content)
+        imageURL = storage.child("images/temp/" + event_token).get_url(None)
+        IMAGE_URL = imageURL
+        current_app.logger.info("[DOORBELL] Image Saved to Database Succesfully")
+        print(fiddl_utils.bcolors.OKBLUE, "                             Database Image URL: ", imageURL, fiddl_utils.bcolors.ENDC)
 
-    try:
-        current_app.logger.info("[DOORBELL] Analyzing Person in Photo")
-        anazlyzeInfo = recognize.facialRecognition(imageURL)
+        try:
+            current_app.logger.info("[DOORBELL] Analyzing Person in Photo")
+            anazlyzeInfo = recognize.facialRecognition(imageURL)
 
-        # TODO: Delete these photos once analyzed
-        # delete_temp_image_path = "images/nestDoorbell/" + event_token
-        # blob = bucket.blob(delete_temp_image_path)
-        # print(fiddl_utils.bcolors.OKBLUE, "                             Image Blob being deleted: ", blob, fiddl_utils.bcolors.ENDC)
-        # blob.delete()
-        current_app.logger.info("[UPLOAD-IMAGE] Photo Analyzed (not currently deleting from temporary storage)")
-    except:
-        # Analyze Fail
-        current_app.logger.warning("[ERROR - ANALYZE] Error Occured: ")
-        fiddl_utils.PrintException()
+            # TODO: Delete these photos once analyzed
+            # delete_temp_image_path = "images/nestDoorbell/" + event_token
+            # blob = bucket.blob(delete_temp_image_path)
+            # print(fiddl_utils.bcolors.OKBLUE, "                             Image Blob being deleted: ", blob, fiddl_utils.bcolors.ENDC)
+            # blob.delete()
+            current_app.logger.info("[UPLOAD-IMAGE] Photo Analyzed (not currently deleting from temporary storage)")
+        except:
+            # Analyze Fail
+            current_app.logger.warning("[ERROR - ANALYZE] Error Occured: ")
+            fiddl_utils.PrintException()
 
-    print(fiddl_utils.bcolors.OKBLUE, "                             FR analyzed info: ", anazlyzeInfo, fiddl_utils.bcolors.ENDC)
-    current_app.logger.info("[UPLOAD-IMAGE] Photo saved and Analyzed by FR")
-    
-    userIdDetermined = anazlyzeInfo[0]
-    proba = anazlyzeInfo[1]
-    ID_DETERMINED = userIdDetermined
-    PROBA = proba
-    print(fiddl_utils.bcolors.OKBLUE, "                             User recognized (userIdDetermined): ", userIdDetermined, fiddl_utils.bcolors.ENDC)
-    print(fiddl_utils.bcolors.OKBLUE, "                             Confidence (probability): ", proba, fiddl_utils.bcolors.ENDC)
-    
-    # TODO: If the userIdDetermined is the person registered to the home, unlock the door
-    # if userIdDetermined.lower() == session['localId'].lower():
-    #     current_app.logger.info("[UPLOAD-IMAGE] Person recognized as logged in user")
-    #     # Unlocks the door while the user is logged in
-    #     smartlock.unlock()
-    #     current_app.logger.warning("[UPLOAD-IMAGE] Door Unlocked")
-    #     userNameDetermined = session["firstName"]
-    #     print(fiddl_utils.bcolors.OKBLUE, "                             User Recognized as: ", userNameDetermined, fiddl_utils.bcolors.ENDC)
-    # else:
-    #     current_app.logger.warning("[UPLOAD-IMAGE] Photo analyzed is not the logged in user.")
-    #     userNameDetermined = "UnKnown Person in Photo"
+        print(fiddl_utils.bcolors.OKBLUE, "                             FR analyzed info: ", anazlyzeInfo, fiddl_utils.bcolors.ENDC)
+        current_app.logger.info("[UPLOAD-IMAGE] Photo saved and Analyzed by FR")
+        
+        userIdDetermined = anazlyzeInfo[0]
+        proba = anazlyzeInfo[1]
+        ID_DETERMINED = userIdDetermined
+        PROBA = proba
+        print(fiddl_utils.bcolors.OKBLUE, "                             User recognized (userIdDetermined): ", userIdDetermined, fiddl_utils.bcolors.ENDC)
+        print(fiddl_utils.bcolors.OKBLUE, "                             Confidence (probability): ", proba, fiddl_utils.bcolors.ENDC)
+        
+        # TODO: If the userIdDetermined is the person registered to the home, unlock the door
+        # if userIdDetermined.lower() == session['localId'].lower():
+        #     current_app.logger.info("[UPLOAD-IMAGE] Person recognized as logged in user")
+        #     # Unlocks the door while the user is logged in
+        #     smartlock.unlock()
+        #     current_app.logger.warning("[UPLOAD-IMAGE] Door Unlocked")
+        #     userNameDetermined = session["firstName"]
+        #     print(fiddl_utils.bcolors.OKBLUE, "                             User Recognized as: ", userNameDetermined, fiddl_utils.bcolors.ENDC)
+        # else:
+        #     current_app.logger.warning("[UPLOAD-IMAGE] Photo analyzed is not the logged in user.")
+        #     userNameDetermined = "UnKnown Person in Photo"
 
-    # Returning any 2xx status indicates successful receipt of the message.
+        # Returning any 2xx status indicates successful receipt of the message.
     return 'OK', 200, redirect(url_for('doorbell.show_success'))
 
 @nestBP.route('/doorbell/image', methods=["GET",  "POST"])
