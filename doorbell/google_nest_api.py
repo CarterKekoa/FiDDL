@@ -29,8 +29,9 @@ def recieve_message_handler():
     payload = base64.b64decode(envelope['message']['data'])
     print(fiddl_utils.bcolors.OKGREEN, "                             JSON Payload: ", payload, fiddl_utils.bcolors.ENDC)
 
+
     current_app.logger.info("[DOORBELL] Payload received, Passing to Google Nest API functions")
-    image_url, event_token, headers = utils.callback(payload)
+    image_url, event_token, headers = utils.callback(envelope)
 
     firebase, auth, db, storage, bucket = fiddl_utils.initialize_data()
     current_app.logger.info("[DOORBELL] Storing Event Image in Database")
