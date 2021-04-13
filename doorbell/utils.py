@@ -36,21 +36,27 @@ def callback(message):
     person = 'sdm.devices.events.CameraPerson.Person'
     motion = 'sdm.devices.events.CameraMotion.Motion'
     chime = 'sdm.devices.events.DoorbellChime.Chime'
+    sound = 'sdm.devices.events.CameraSound.Sound'
     event = chime
 
+    print("1")
     # using 'sdm.devices.events.CameraPerson.Person' to get person events only
     if event in event_type:
+        print("2")
         current_app.logger.info("[DOORBELL] Chime event found")
         event_id = event_type[event]['eventId']
         print(fiddl_utils.bcolors.OKGREEN, "                             Event Id: ", event_id, fiddl_utils.bcolors.ENDC)
         image_url, event_token, headers = get_image(event_id) # get the image
+        print("3")
     else:
+        print("4")
         return None, None, None
 
     # delete the message from the Google Cloud Platform queue
     current_app.logger.info("[DOORBELL] Message Acknowledged")
     # message.ack()
     print()
+    print("5")
     print("image_url: ",image_url)
     print("event_token: ",event_token)
     print("headers: ", headers)
