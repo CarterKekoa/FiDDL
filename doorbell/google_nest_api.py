@@ -31,7 +31,9 @@ def recieve_message_handler():
 
 
     current_app.logger.info("[DOORBELL] Payload received, Passing to Google Nest API functions")
+    print("1")
     event_info = utils.callback(payload)
+    print("6")
     
     if(event_info):
         print("7")

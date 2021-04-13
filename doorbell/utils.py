@@ -40,10 +40,10 @@ def callback(message):
     event = chime
 
     info = []
-    print("1")
+    print("2")
     # using 'sdm.devices.events.CameraPerson.Person' to get person events only
     if event in event_type:
-        print("2")
+        print("3")
         current_app.logger.info("[DOORBELL] Chime event found")
         event_id = event_type[event]['eventId']
         print(fiddl_utils.bcolors.OKGREEN, "                             Event Id: ", event_id, fiddl_utils.bcolors.ENDC)
@@ -52,11 +52,11 @@ def callback(message):
         info.append(event_token)
         info.append(headers)
         print()
-        print("5")
+        print("4")
         print("image_url: ",image_url)
         print("event_token: ",event_token)
         print("headers: ", headers)
-
+    print("5")
     # delete the message from the Google Cloud Platform queue
     #current_app.logger.info("[DOORBELL] Message Acknowledged")
     #message.ack()
