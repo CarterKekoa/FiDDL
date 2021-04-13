@@ -29,7 +29,12 @@ def recieve_message_handler():
     print(fiddl_utils.bcolors.OKGREEN, "                             [Nest Doorbell] \n JSON Envelope: ", envelope, fiddl_utils.bcolors.ENDC)
     payload = base64.b64decode(envelope['message']['data'])
     print(fiddl_utils.bcolors.OKGREEN, "                             JSON Payload: ", payload, fiddl_utils.bcolors.ENDC)
+    print("0")
     PAYLOAD = payload
+    print("0.1")
+    
+    current_app.logger.info("[DOORBELL] Acknowledging Message")
+    print("0.2")
     return 'OK', 200, redirect(url_for('doorbell.show_success'))
 
 @nestBP.route('/doorbell/image', methods=["GET",  "POST"])
