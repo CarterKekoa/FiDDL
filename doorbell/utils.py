@@ -47,15 +47,8 @@ def callback(message):
         current_app.logger.info("[DOORBELL] Chime event found")
         event_id = event_type[event]['eventId']
         print(fiddl_utils.bcolors.OKGREEN, "                             Event Id: ", event_id, fiddl_utils.bcolors.ENDC)
-        image_url, event_token, headers = get_image(event_id) # get the image
-        info.append(image_url)
-        info.append(event_token)
-        info.append(headers)
-        print()
+        info = get_image(event_id) # get the image
         print("4")
-        print("image_url: ",image_url)
-        print("event_token: ",event_token)
-        print("headers: ", headers)
     print("5")
     # delete the message from the Google Cloud Platform queue
     #current_app.logger.info("[DOORBELL] Message Acknowledged")
@@ -86,18 +79,21 @@ def get_image(eventId):
     current_app.logger.info("[DOORBELL] Accessing Google Cloud Nest Doorbell Image from the Event Id")
     # response from the google cloud
     response = requests.post(url_str, headers=headers, data=data).json()
-
+    info = []
     if 'error' in response:
         print(fiddl_utils.bcolors.WARNING, "                             ERROR WITH GCLOUD RESPONSE: ", response['error']['message'], fiddl_utils.bcolors.ENDC)
-        return
+        return info
 
     results = response['results']
     image_url = results['url']
+    info.append(image_url)
     event_token = results['token']
+    info.append(event_token)
     current_app.logger.info("[DOORBELL] Image URL Grabbed Succesfully")
     headers = { 'Authorization': 'Basic ' + event_token }
+    info.append(headers)
 
-    return image_url, event_token, headers
+    return info
     
 
 # ----------------------------------------------------------------------------
