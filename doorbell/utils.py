@@ -37,7 +37,7 @@ def callback(message):
     motion = 'sdm.devices.events.CameraMotion.Motion'
     chime = 'sdm.devices.events.DoorbellChime.Chime'
     sound = 'sdm.devices.events.CameraSound.Sound'
-    event = chime
+    event = person
 
     info = []
     print("2")

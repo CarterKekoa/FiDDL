@@ -37,7 +37,6 @@ def handle_payload(payload):
         response = requests.get(image_url, headers=headers, stream=True)
         storage.child("images/nestDoorbell/" + event_token).put(response.content)
         imageURL = storage.child("images/temp/" + event_token).get_url(None)
-        IMAGE_URL = imageURL
         current_app.logger.info("[DOORBELL] Image Saved to Database Succesfully")
         print(fiddl_utils.bcolors.OKBLUE, "                             Database Image URL: ", imageURL, fiddl_utils.bcolors.ENDC)
 
@@ -61,8 +60,6 @@ def handle_payload(payload):
         
         userIdDetermined = anazlyzeInfo[0]
         proba = anazlyzeInfo[1]
-        ID_DETERMINED = userIdDetermined
-        PROBA = proba
         print(fiddl_utils.bcolors.OKBLUE, "                             User recognized (userIdDetermined): ", userIdDetermined, fiddl_utils.bcolors.ENDC)
         print(fiddl_utils.bcolors.OKBLUE, "                             Confidence (probability): ", proba, fiddl_utils.bcolors.ENDC)
         
@@ -79,6 +76,7 @@ def handle_payload(payload):
         #     userNameDetermined = "UnKnown Person in Photo"
 
         # Returning any 2xx status indicates successful receipt of the message.
+        render_template('doorbell.html', image=imageURL, IdDetermined=userIdDetermined, proba=proba)
     print("8")
 
 @nestBP.route('/doorbell', methods=["POST"])
