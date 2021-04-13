@@ -19,11 +19,11 @@ ID_DETERMINED = None
 PROBA = None
 PAYLOAD = None
 
-def handle_payload():
+def handle_payload(payload):
     current_app.logger.info("[DOORBELL] Payload received, Passing to Google Nest API functions")
     print("1")
     event_info = []
-    event_info = utils.callback(PAYLOAD)
+    event_info = utils.callback(payload)
     print("6")
     
     if(event_info):
@@ -92,9 +92,8 @@ def recieve_message_handler():
     payload = base64.b64decode(envelope['message']['data'])
     print(fiddl_utils.bcolors.OKGREEN, "                             JSON Payload: ", payload, fiddl_utils.bcolors.ENDC)
     print("0")
-    PAYLOAD = payload
+    handle_payload(payload)
     print("0.1")
-    handle_payload()
     current_app.logger.info("[DOORBELL] Acknowledging Message")
     print("0.2")
     return 'OK', 200
