@@ -27,7 +27,10 @@ def callback(message):
     print("Message: ", message)
     # convert message into a python dictionary of the event
     event_json = json.loads(bytes.decode(message))
+    print()
+    print("event_json: ", event_json)
     event_type = event_json['resourceUpdate']['events']
+    print("event_type: ", event_type)
     #event_type = message['resourceUpdate']['events']
 
     person = 'sdm.devices.events.CameraPerson.Person'
