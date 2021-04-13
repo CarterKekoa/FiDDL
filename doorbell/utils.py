@@ -26,9 +26,9 @@ def callback(message):
     print("Payload Type: ", type(message))
     print("Message: ", message)
     # convert message into a python dictionary of the event
-    #event_json = json.loads(bytes.decode(message.data))
-    #event_type = event_json['resourceUpdate']['events']
-    event_type = message['resourceUpdate']['events']
+    event_json = json.loads(bytes.decode(message))
+    event_type = event_json['resourceUpdate']['events']
+    #event_type = message['resourceUpdate']['events']
 
     person = 'sdm.devices.events.CameraPerson.Person'
     motion = 'sdm.devices.events.CameraMotion.Motion'
