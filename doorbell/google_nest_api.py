@@ -14,11 +14,6 @@ import FacialRecognition.recognize as recognize
 
 nestBP = Blueprint("doorbell", __name__, static_folder="static", template_folder="templates")
 
-IMAGE_URL = None
-ID_DETERMINED = None
-PROBA = None
-PAYLOAD = None
-
 def handle_payload(payload):
     current_app.logger.info("[DOORBELL] Payload received, Passing to Google Nest API functions")
     print("1")
@@ -31,21 +26,23 @@ def handle_payload(payload):
         image_url = event_info[0]
         event_token = event_info[1]
         headers = event_info[2]
+        event_id = event_info[3]
         firebase, auth, db, storage, bucket = fiddl_utils.initialize_data()
         current_app.logger.info("[DOORBELL] Storing Event Image in Database")
         
         response = requests.get(image_url, headers=headers, stream=True)
-        storage.child("images/nestDoorbell/" + event_token).put(response.content)
-        imageURL = storage.child("images/temp/" + event_token).get_url(None)
+        storage.child("images/nestDoorbell/" + event_id).put(response.content)
+        imageURL = storage.child("images/temp/" + event_id).get_url(None)
         current_app.logger.info("[DOORBELL] Image Saved to Database Succesfully")
         print(fiddl_utils.bcolors.OKBLUE, "                             Database Image URL: ", imageURL, fiddl_utils.bcolors.ENDC)
 
         try:
             current_app.logger.info("[DOORBELL] Analyzing Person in Photo")
             anazlyzeInfo = recognize.facialRecognition(imageURL)
-
+            print(fiddl_utils.bcolors.OKBLUE, "                             FR analyzed info: ", anazlyzeInfo, fiddl_utils.bcolors.ENDC)
+        
             # TODO: Delete these photos once analyzed
-            # delete_temp_image_path = "images/nestDoorbell/" + event_token
+            # delete_temp_image_path = "images/nestDoorbell/" + event_id
             # blob = bucket.blob(delete_temp_image_path)
             # print(fiddl_utils.bcolors.OKBLUE, "                             Image Blob being deleted: ", blob, fiddl_utils.bcolors.ENDC)
             # blob.delete()
