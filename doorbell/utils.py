@@ -48,7 +48,9 @@ def callback(message):
         event_id = event_type[event]['eventId']
         print(fiddl_utils.bcolors.OKGREEN, "                             Event Id: ", event_id, fiddl_utils.bcolors.ENDC)
         image_url, event_token, headers = get_image(event_id) # get the image
-        info.append(image_url, event_token, headers)
+        info.append(image_url)
+        info.append(event_token)
+        info.append(headers)
         print()
         print("5")
         print("image_url: ",image_url)
