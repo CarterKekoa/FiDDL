@@ -52,7 +52,6 @@ def handle_payload(payload):
             current_app.logger.warning("[ERROR - ANALYZE] Error Occured: ")
             fiddl_utils.PrintException()
 
-        print(fiddl_utils.bcolors.OKBLUE, "                             FR analyzed info: ", anazlyzeInfo, fiddl_utils.bcolors.ENDC)
         current_app.logger.info("[UPLOAD-IMAGE] Photo saved and Analyzed by FR")
         
         userIdDetermined = anazlyzeInfo[0]
