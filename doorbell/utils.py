@@ -48,7 +48,8 @@ def callback(message):
         event_id = event_type[event]['eventId']
         print(fiddl_utils.bcolors.OKGREEN, "                             Event Id: ", event_id, fiddl_utils.bcolors.ENDC)
         info = get_image(event_id) # get the image
-        info.append(event_id)
+        if(info):
+            info.append(event_id)
         print("4")
     print("5")
     # delete the message from the Google Cloud Platform queue
