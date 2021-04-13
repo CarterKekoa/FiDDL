@@ -19,17 +19,6 @@ import FacialRecognition.detect_faces as detect_faces
 
 userBP = Blueprint("users", __name__, static_folder="static", template_folder="templates")
 
-"""
-@userBP.route('/doorbell', methods=["GET", "POST"])
-def nest():
-    print("Doorbell function")
-    #firebase, auth, db, storage, bucket = fiddl_utils.initialize_data()
-    utils.pull_messages()
-    print("Messages pulled succesfully")
-
-    return redirect(url_for('users.home'))
-"""
-
 # Home Page ---------------------------------------------------------------------------------------------------
 @userBP.route('/home', methods=["GET", "POST"])
 def home():

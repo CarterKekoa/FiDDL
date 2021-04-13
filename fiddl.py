@@ -45,7 +45,7 @@ app.config["MAX_IMAGE_FILESIZE"] = 4 * 1024 * 1024    # 1,572,864 Bytes or 1572.
 app.config["FIDDL_DIR"] = os.path.dirname(os.path.abspath(__file__)) # absolute path to this file
 app.config["IMAGE_UPLOAD_DIR"] = os.path.join(app.config["FIDDL_DIR"], "photosTest")
 app.config["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.join(app.config["FIDDL_DIR"], "fiddl-1604901867274-1d28c44d691d.json")
-print("+++++++++++++++++++++++++", app.config["GOOGLE_APPLICATION_CREDENTIALS"])
+#print("app.config[GOOGLE_APPLICATION_CREDENTIALS]: ", app.config["GOOGLE_APPLICATION_CREDENTIALS"])
 #app.config["PARENT_DIR"] = os.path.join(app.config["FILE_DIR"], os.pardir) # absolute path to this file's root directory
 
 
@@ -94,4 +94,4 @@ if __name__ == "__main__":
     print("__main__")
     app.secret_key = os.urandom(24)                                # random secret key to track if user is logged in
     app.run(debug=True)         #dev mode, server updates on own, shows errors
-    
+
