@@ -14,6 +14,10 @@ import FacialRecognition.recognize as recognize
 
 nestBP = Blueprint("doorbell", __name__, static_folder="static", template_folder="templates")
 
+IMG_URL = None
+ID_DETERMINED = None
+PROBA = None
+
 def handle_payload(payload):
     current_app.logger.info("[DOORBELL] Payload received, Passing to Google Nest API functions")
     print("1")
@@ -94,4 +98,4 @@ def recieve_message_handler():
 
 @nestBP.route('/doorbell/image', methods=["GET",  "POST"])
 def show_success():
-    return render_template('doorbell.html')
+    return render_template('doorbell.html', image=IMG_URL, IdDetermined=ID_DETERMINED, proba=PROBA)
