@@ -14,6 +14,10 @@ import FacialRecognition.recognize as recognize
 
 nestBP = Blueprint("doorbell", __name__, static_folder="static", template_folder="templates")
 
+IMAGE_URL = None
+ID_DETERMINED = None
+PROBA = None
+
 @nestBP.route('/doorbell', methods=["POST"])
 def recieve_message_handler():
     print()
@@ -34,6 +38,7 @@ def recieve_message_handler():
     response = requests.get(image_url, headers=headers, stream=True)
     storage.child("images/nestDoorbell/" + event_token).put(response.content)
     imageURL = storage.child("images/temp/" + event_token).get_url(None)
+    IMAGE_URL = imageURL
     current_app.logger.info("[DOORBELL] Image Saved to Database Succesfully")
     print(fiddl_utils.bcolors.OKBLUE, "                             Database Image URL: ", imageURL, fiddl_utils.bcolors.ENDC)
 
@@ -57,6 +62,8 @@ def recieve_message_handler():
     
     userIdDetermined = anazlyzeInfo[0]
     proba = anazlyzeInfo[1]
+    ID_DETERMINED = userIdDetermined
+    PROBA = proba
     print(fiddl_utils.bcolors.OKBLUE, "                             User recognized (userIdDetermined): ", userIdDetermined, fiddl_utils.bcolors.ENDC)
     print(fiddl_utils.bcolors.OKBLUE, "                             Confidence (probability): ", proba, fiddl_utils.bcolors.ENDC)
     
@@ -73,4 +80,8 @@ def recieve_message_handler():
     #     userNameDetermined = "UnKnown Person in Photo"
 
     # Returning any 2xx status indicates successful receipt of the message.
-    return 'OK', 200, render_template('doorbell.html', image=imageURL, IdDetermined=userIdDetermined)
+    return 'OK', 200, redirect(url_for('doorbell.show_success'))
+
+@nestBP.route('/doorbell/image', methods=["GET",  "POST"])
+def show_success():
+    return render_template('doorbell.html', image=IMAGE_URL, IdDetermined=ID_DETERMINED, proba=PROBA)
