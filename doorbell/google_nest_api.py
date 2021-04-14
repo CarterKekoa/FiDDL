@@ -51,17 +51,16 @@ def handle_payload(payload):
             # print(fiddl_utils.bcolors.OKBLUE, "                             Image Blob being deleted: ", blob, fiddl_utils.bcolors.ENDC)
             # blob.delete()
             current_app.logger.info("[UPLOAD-IMAGE] Photo Analyzed (not currently deleting from temporary storage)")
+            userIdDetermined = anazlyzeInfo[0]
+            proba = anazlyzeInfo[1]
+            print(fiddl_utils.bcolors.OKBLUE, "                             User recognized (userIdDetermined): ", userIdDetermined, fiddl_utils.bcolors.ENDC)
+            print(fiddl_utils.bcolors.OKBLUE, "                             Confidence (probability): ", proba, fiddl_utils.bcolors.ENDC)
+            current_app.logger.info("[UPLOAD-IMAGE] Photo saved and Analyzed by FR")
         except:
             # Analyze Fail
-            current_app.logger.warning("[ERROR - ANALYZE] Error Occured: ")
+            current_app.logger.warning("[ERROR - DOORBELL] Error Occured: ")
             fiddl_utils.PrintException()
 
-        current_app.logger.info("[UPLOAD-IMAGE] Photo saved and Analyzed by FR")
-        
-        userIdDetermined = anazlyzeInfo[0]
-        proba = anazlyzeInfo[1]
-        print(fiddl_utils.bcolors.OKBLUE, "                             User recognized (userIdDetermined): ", userIdDetermined, fiddl_utils.bcolors.ENDC)
-        print(fiddl_utils.bcolors.OKBLUE, "                             Confidence (probability): ", proba, fiddl_utils.bcolors.ENDC)
         
         # TODO: If the userIdDetermined is the person registered to the home, unlock the door
         # if userIdDetermined.lower() == session['localId'].lower():
