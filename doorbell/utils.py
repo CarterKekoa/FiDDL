@@ -51,6 +51,15 @@ def callback(message):
         if(info):
             info.append(event_id)
         print("4")
+    elif chime in event_type:
+        print("3")
+        current_app.logger.info("[DOORBELL] Chime event found")
+        event_id = event_type[chime]['eventId']
+        print(fiddl_utils.bcolors.OKGREEN, "                             Event Id: ", event_id, fiddl_utils.bcolors.ENDC)
+        info = get_image(event_id) # get the image
+        if(info):
+            info.append(event_id)
+        print("4")
     print("5")
     # delete the message from the Google Cloud Platform queue
     #current_app.logger.info("[DOORBELL] Message Acknowledged")
