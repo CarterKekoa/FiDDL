@@ -56,6 +56,8 @@ def handle_payload(payload):
             print(fiddl_utils.bcolors.OKBLUE, "                             User recognized (userIdDetermined): ", userIdDetermined, fiddl_utils.bcolors.ENDC)
             print(fiddl_utils.bcolors.OKBLUE, "                             Confidence (probability): ", proba, fiddl_utils.bcolors.ENDC)
             current_app.logger.info("[UPLOAD-IMAGE] Photo saved and Analyzed by FR")
+            # Returning any 2xx status indicates successful receipt of the message.
+            render_template('doorbell.html', image=imageURL, IdDetermined=userIdDetermined, proba=proba)
         except:
             # Analyze Fail
             current_app.logger.warning("[ERROR - DOORBELL] Error Occured: ")
@@ -73,9 +75,6 @@ def handle_payload(payload):
         # else:
         #     current_app.logger.warning("[UPLOAD-IMAGE] Photo analyzed is not the logged in user.")
         #     userNameDetermined = "UnKnown Person in Photo"
-
-        # Returning any 2xx status indicates successful receipt of the message.
-        render_template('doorbell.html', image=imageURL, IdDetermined=userIdDetermined, proba=proba)
     print("8")
 
 @nestBP.route('/doorbell', methods=["POST"])
