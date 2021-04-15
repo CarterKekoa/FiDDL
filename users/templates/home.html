@@ -19,13 +19,41 @@
         </form>
     </div>
 
+    {% if user_names %}
+        <div class="container">
+            <h2>Permitted Users (Owner feature):</h2>
+            <p>Select who is allowed entry:</p>
+
+            <form method="POST">
+                {% for name in user_names %}
+                    {% if name in admitted_names %}
+                        <div>
+                            <input type="checkbox" id={{name}} name=persons value={{name}} checked>
+                            <label for={{name}}>{{name}}</label>
+                        </div>
+                    {% else %}
+                    <div>
+                        <input type="checkbox" id={{name}} name=persons value={{name}}>
+                        <label for={{name}}>{{name}}</label>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+                <br>
+                <button class="home submitPersons" type="submit" name="button" value="submitPersonsButton" method="POST">Submit</button>
+            </form>
+        </div>
+        <!--Do something with the selections-->
+    {% endif %}
+
     <div></div>
     <div>
-        <h2>Photos in {{firstName}}'s Database</h2>
+        <h2>Photos in {{firstName}}'s database:</h2>
         <div>
             <form method="POST">
-                <button class="home editphotos" type="submit" name="button" value="editPhotosButton" method="POST">Edit Photos</button>
+                <button class="home clearphotos" type="submit" name="button" value="clearPhotosButton" method="POST">Clear Photos</button>
             </form>
+            <br>
+
             {% for urls in images %}
                 <!--{{urls}}-->
                 <img src={{urls}} width="200" height="200">

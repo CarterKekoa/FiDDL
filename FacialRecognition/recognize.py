@@ -101,11 +101,17 @@ def facialRecognition(imagePath):
 			preds = recognizer.predict_proba(vec)[0]
 			j = np.argmax(preds)
 			proba = preds[j]
-			name = le.classes_[j]
+			if proba < .35:
+				name = "Unknown"
+			else:
+				name = le.classes_[j]
 
 			# draw the bounding box of the face along with the associated
 			# probability
-			text = "{}: {:.2f}%".format(name, proba * 100)
+			if name == "Unknown":
+				text = "{}: {:.2f}".format(name)
+			else:
+				text = "{}: {:.2f}%".format(name, proba * 100)
 			y = startY - 10 if startY - 10 > 10 else startY + 10
 			cv2.rectangle(image, (startX, startY), (endX, endY),
 				(0, 0, 255), 2)

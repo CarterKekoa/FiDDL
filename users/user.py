@@ -17,11 +17,13 @@ import FacialRecognition.detect_faces as detect_faces
 
 userBP = Blueprint("users", __name__, static_folder="static", template_folder="templates")
 
-
 # Home Page ---------------------------------------------------------------------------------------------------
 @userBP.route('/home', methods=["GET", "POST"])
 def home():
     current_app.logger.info("[HOME]")
+    homeowner = False
+    names_list = []
+    admitted_names_list = []
     # Check if a user is already logged in
     if not session.get('usr') is None:
         print()
@@ -29,73 +31,119 @@ def home():
         current_app.logger.info("[HOME] A user is logged in, continue.")
         print(fiddl_utils.bcolors.OKBLUE, "                             Loged in user: ", session['localId'], fiddl_utils.bcolors.ENDC)
         firebase, auth, db, storage, bucket = fiddl_utils.initialize_data()
-        try:
-            #userId = auth.current_user['localId']               #auth.current_user is how we get the current users data
-            photo_names_in_db = {}  # will be popluated with all of the users uploaded photo names
-            images = []             # will store the urls of the users photos
-            image_names = []        # will simply store the images names that exist in the users database
-            current_app.logger.info("[HOME] Attempting to grab users database information...")
-            
-            #Grab users name
-            user = db.child("users").child(session['localId']).get().val()
-            #Parse the returned OrderedDict of data
-            for val in user.values():
-                #Grab logining in users name from database. Not necessary here
-                for k,v in val.items():
-                    #print(k,v)
-                    if k[0] == '-':
-                        photo_names_in_db[k] = v
-                        image_names.append(v)
-                        imageURL = storage.child("images/" + session['localId'] + "/" + v).get_url(None)      # URL for Google Storage Photo location
-                        images.append(imageURL)                 # Stores the URL of each photo for the user
-                    else:
-                        session[k] = v
-                        print(fiddl_utils.bcolors.OKBLUE, "                             session[", k, "]:", session[k], fiddl_utils.bcolors.ENDC)
-                
-            session['userPhotoNames'] = photo_names_in_db        # session['userPhotoNames'] has the id of each photo paired with the actual photo file name
-            print(fiddl_utils.bcolors.OKBLUE, "                             session['userPhotoNames']: ", session['userPhotoNames'], fiddl_utils.bcolors.ENDC)
-            session["userImageURLs"] = images
-            session["justPhotoNames"] = image_names
-            print()
-            print(fiddl_utils.bcolors.OKBLUE, "                             session['userImageURLs']: ", session['userImageURLs'], fiddl_utils.bcolors.ENDC)
-            print()
-            current_app.logger.info("[HOME] Users database information grabbed succesfully.")
-            # TODO: Display more user info, kinds we need are probably user home nickname and
 
-            # Prints stored user photos to users home screen
-            current_app.logger.info("[HOME] Displaying photos to screen...")
-            return render_template('home.html', firstName=session["firstName"], images=session["userImageURLs"], imgNames = session["justPhotoNames"])
+        #Grab users name
+        user = db.child("users").child(session['localId']).get().val()
+        if session["firstName"] == "kevin":
+            homeowner = True
+
+        #Parse the returned OrderedDict of data
+        for uID, name in db.child("user_names").get().val().items():
+            names_list.append(name)
+
+        for uID, name in db.child("admitted_users").get().val().items():
+            admitted_names_list.append(name)
+
+        try:
+            if request.method == "GET":
+                #userId = auth.current_user['localId']               #auth.current_user is how we get the current users data
+                photo_names_in_db = {}  # will be popluated with all of the users uploaded photo names
+                images = []             # will store the urls of the users photos
+                image_names = []        # will simply store the images names that exist in the users database
+                current_app.logger.info("[HOME] Attempting to grab users database information...")
+
+                #Parse the returned OrderedDict of data
+                for val in user.values():
+                    #Grab logining in users name from database. Not necessary here
+                    for k,v in val.items():
+                        #print(k,v)
+                        if k[0] == '-':
+                            photo_names_in_db[k] = v
+                            image_names.append(v)
+                            imageURL = storage.child("images/" + session['localId'] + "/" + v).get_url(None)      # URL for Google Storage Photo location
+                            images.append(imageURL)                 # Stores the URL of each photo for the user
+                        else:
+                            session[k] = v
+                            print(fiddl_utils.bcolors.OKBLUE, "                             session[", k, "]:", session[k], fiddl_utils.bcolors.ENDC)
+                    
+                session['userPhotoNames'] = photo_names_in_db        # session['userPhotoNames'] has the id of each photo paired with the actual photo file name
+                print(fiddl_utils.bcolors.OKBLUE, "                             session['userPhotoNames']: ", session['userPhotoNames'], fiddl_utils.bcolors.ENDC)
+                session["userImageURLs"] = images
+                session["justPhotoNames"] = image_names
+                print()
+                print(fiddl_utils.bcolors.OKBLUE, "                             session['userImageURLs']: ", session['userImageURLs'], fiddl_utils.bcolors.ENDC)
+                print()
+                current_app.logger.info("[HOME] Users database information grabbed succesfully.")
+                # TODO: Display more user info, kinds we need are probably user home nickname and
+                
+
+                # Prints stored user photos to users home screen
+                current_app.logger.info("[HOME] Displaying photos to screen...")
+
+
+            elif request.method == "POST":
+                try:
+                    #Check if button is clicked
+                    if request.form['button'] == 'addNewPhoto':
+                        #Add new photo button
+                        current_app.logger.info("[HOME] Switching to [UPLOAD-IMAGE]----------------------------------------------------------------------------------")
+                        return redirect(url_for('users.upload_image'))
+                    elif request.form['button'] == 'clearPhotosButton':
+                        ## Can't figure out how to clear photos from storage, database works
+                        #for Pid, name in db.child("users").child(session['localId']).child("photos").get().val().items():
+                            #print("name: ", name)
+                            #storage.child("images/" + session['localId'] + "/").delete(name)
+                        db.child("users").child(session['localId']).child("photos").remove()
+                        session["userImageURLs"] = []
+                        session["justPhotoNames"] = []
+                    elif request.form['button'] == 'submitPersonsButton':
+                        admitted_names_list = request.form.getlist("persons")
+                        for person in admitted_names_list:
+                            admitted = False
+                            for uID, name in db.child("admitted_users").get().val().items():
+                                if person == name:
+                                    admitted = True
+                            if admitted == False:
+                                db.child("admitted_users").push(person)
+                        for uID, name in db.child("admitted_users").get().val().items():
+                            if name not in admitted_names_list:
+                                db.child("admitted_users").child(uID).remove()
+                    elif request.form['button'] == 'logoutButton':
+                        #Logout Button
+                        current_app.logger.info("[HOME] Loggin Out, switching to [LOGOUT]----------------------------------------------------------------------------------")
+                        return redirect(url_for('auth.logout'))
+                except:
+                    # Fail
+                    current_app.logger.warning("[ERROR - Buttons] Error Occured: ")
+                    fiddl_utils.PrintException()
+
+            # have a homeowner variable and return different templates depending on who is logged in
+            if homeowner == True:
+                return render_template('home.html', admitted_names=admitted_names_list, user_names=names_list, firstName=session["firstName"], images=session["userImageURLs"], imgNames = session["justPhotoNames"])
+            else:
+                return render_template('home.html', firstName=session["firstName"], images=session["userImageURLs"], imgNames = session["justPhotoNames"])
         except:
             # Home Fail
             current_app.logger.warning("[ERROR - HOME] Error Occured: ")
             fiddl_utils.PrintException()
-            render_template('home.html', firstName=session["firstName"])
-        
-        if request.method == "POST":
-            #Check if button is clicked
-            if request.form['button'] == 'addNewPhoto':
-                #Add new photo button
-                current_app.logger.info("[HOME] Switching to [UPLOAD-IMAGE]----------------------------------------------------------------------------------")
-                return redirect(url_for('users.upload_image'))
-            elif request.form['button'] == 'editPhotosButton':
-                #TODO: edit photos to delete button
-                print("Edit button")
-                
-                editPhotos = True
-                render_template("home.html", editPhotos = editPhotos)
-                im_urls = session["userImageURLs"]
-                im_names = session["justPhotoNames"]
-            elif request.form['button'] == 'logoutButton':
-                #Logout Button
-                current_app.logger.info("[HOME] Loggin Out, switching to [LOGOUT]----------------------------------------------------------------------------------")
-                return redirect(url_for('auth.logout'))
-            return render_template('home.html')
-        elif request.method == "GET":
-            render_template('home.html')
+            if homeowner == True:
+                return render_template('home.html', admitted_names=admitted_names_list, user_names=names_list, firstName=session["firstName"], images=session["userImageURLs"], imgNames = session["justPhotoNames"])
+            else:
+                return render_template('home.html', firstName=session["firstName"], images=session["userImageURLs"], imgNames = session["justPhotoNames"])
+
     else:
         current_app.logger.warning("[HOME] No user currently logged in, redirecting moving to [LOGIN]----------------------------------------------------------------------------------")
         return redirect(url_for('auth.login'))
-    return render_template('home.html')
+    if homeowner == True:
+        return render_template('home.html', admitted_names=admitted_names_list, user_names=names_list, firstName=session["firstName"], images=session["userImageURLs"], imgNames = session["justPhotoNames"])
+    else:
+        return render_template('home.html', firstName=session["firstName"], images=session["userImageURLs"], imgNames = session["justPhotoNames"])
+
+
+
+
+
+
 
 # Upload Image ---------------------------------
 @userBP.route('/upload-image', methods=["GET", "POST"])
@@ -231,7 +279,7 @@ def upload_image():
                 elif request.form['button'] == 'backHomeButton':
                     #Home Button
                     current_app.logger.info("[UPLOAD-IMAGE] Switching to [HOME]----------------------------------------------------------------------------------")
-                    return redirect(url_for('general.home'))
+                    return redirect(url_for('users.home'))
             except:
                 # Upload Image Fail
                 current_app.logger.warning("[ERROR - UPLOAD-IMAGE] Error Occured: ")

@@ -4,6 +4,7 @@ from flask import Blueprint, render_template, request, session, current_app, red
 import FacialRecognition.recognize as recognize
 import FacialRecognition.extract_embeddings as extract_embeddings
 import FacialRecognition.train_model as train_model
+import FacialRecognition.recognize_video as recognize_video
 
 mainBP = Blueprint("general", __name__, static_folder="static", template_folder="templates")
 
@@ -32,6 +33,16 @@ def welcome():
                 current_app.logger.info("[WELCOME] Models Trained")
                 modelsTrained = "New Facial Recognition models succesfully computed. Any new users and images are now included."
                 flash(modelsTrained, "info")                    #"info" is the type of message for more customization if we want, others are warning, info, error
+            except:
+                current_app.logger.info("[ERROR - WELCOME] Error Occured...")
+                fiddl_utils.PrintException()
+            return redirect(url_for('general.welcome'))
+        elif request.form['button'] == 'frButton':
+            current_app.logger.info("[WELCOME] Running webcame facial recognition...")
+            try:
+                current_app.logger.info("[WELCOME] Activating Webcam...")
+                #recognize_video.facial_recognition_video()
+                current_app.logger.info("[WELCOME] Webcam activated")
             except:
                 current_app.logger.info("[ERROR - WELCOME] Error Occured...")
                 fiddl_utils.PrintException()

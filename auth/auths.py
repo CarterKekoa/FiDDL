@@ -158,7 +158,7 @@ def register():
                     #auth.send_email_verification(user['idToken'])                     #send a user confirmation email
                     #verify = 'An email has been sent to' + email + ". Please verify your account before logging in."
                     #current_app.logger.info(verify)
-                   
+
                     # Log User In
                     user = auth.sign_in_with_email_and_password(email, password)
                     current_app.logger.info("[REGISTER] Google Authentication Success, storing user info")
@@ -182,6 +182,9 @@ def register():
                     # TODO: Potentially change this and isntead of pushing in an object, push each individually?
                     db.child("users").child(session['localId']).push(data, session['usr'])        #Push user data to RTDB
                     current_app.logger.info("[REGISTER] User register info stored in firebase")
+
+                    # Put user's name is username list
+                    db.child("user_names").push(firstName)
 
                     # Go to Home Page for New User
                     current_app.logger.info("[REGISTER] Registration Process Ended Successfully, Moving to [HOME]----------------------------------------------------------------------------------")
