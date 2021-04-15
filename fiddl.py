@@ -26,11 +26,6 @@ from users.user import userBP
 from general.main import mainBP
 
 
-
-import recognize
-import extract_embeddings
-import train_model
-
 app = Flask(__name__)                                                    #call flask constuctor from object #__name__ references this file
    
 app.register_blueprint(authsBP, url_prefix="")      # register the blue prints
@@ -87,11 +82,9 @@ USER = {
     }
 app.config['USER'] = USER
 
-<<<<<<< HEAD
 if __name__ == "__main__":      
     print("__main__")
     app.secret_key = os.urandom(24)                                # random secret key to track if user is logged in
-=======
 ALL = {
     "all_images": []
 }
@@ -593,5 +586,4 @@ def get_req():
 
 
 if __name__ == "__main__":      #if running from command line, turn on dev mode
->>>>>>> 7f50cb52cd217e5e0c1e2e3d8df351cb3bcf5805
     app.run(debug=True)         #dev mode, server updates on own, shows errors
