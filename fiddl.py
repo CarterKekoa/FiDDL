@@ -12,7 +12,6 @@ import imghdr
 
 from werkzeug.utils import secure_filename                               #takes a file name and returns a secure version of it
 import subprocess
-<<<<<<< HEAD
 from datetime import timedelta                                          # used for permanent sessions
 import smartlock
 
@@ -28,11 +27,9 @@ from general.main import mainBP
 
 
 
-=======
 import recognize
 import extract_embeddings
 import train_model
->>>>>>> 7f50cb52cd217e5e0c1e2e3d8df351cb3bcf5805
 
 app = Flask(__name__)                                                    #call flask constuctor from object #__name__ references this file
    
