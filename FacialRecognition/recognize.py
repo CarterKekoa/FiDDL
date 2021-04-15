@@ -66,6 +66,7 @@ def facialRecognition(imagePath):
 	# faces in the input image
 	detector.setInput(imageBlob)
 	detections = detector.forward()
+	info = []
 
 	# loop over the detections
 	for i in range(0, detections.shape[2]):
