@@ -4,6 +4,8 @@ from werkzeug.utils import secure_filename       #takes a file name and returns 
 import smartlock
 from PIL import Image
 import cv2
+import json
+import base64
 
 # Helper File Imports
 import users.utils as utils
@@ -108,6 +110,10 @@ def home():
                         for uID, name in db.child("admitted_users").get().val().items():
                             if name not in admitted_names_list:
                                 db.child("admitted_users").child(uID).remove()
+                     elif request.form['input'] == 'pullNestMessagesButton':
+                        # TODO: Doorbell
+                        print("Pull nest messages button clicked")
+                        return redirect(url_for('users.nest'))
                     elif request.form['button'] == 'logoutButton':
                         #Logout Button
                         current_app.logger.info("[HOME] Loggin Out, switching to [LOGOUT]----------------------------------------------------------------------------------")
@@ -130,18 +136,6 @@ def home():
                 return render_template('home.html', admitted_names=admitted_names_list, user_names=names_list, firstName=session["firstName"], images=session["userImageURLs"], imgNames = session["justPhotoNames"])
             else:
                 return render_template('home.html', firstName=session["firstName"], images=session["userImageURLs"], imgNames = session["justPhotoNames"])
-
-    else:
-        current_app.logger.warning("[HOME] No user currently logged in, redirecting moving to [LOGIN]----------------------------------------------------------------------------------")
-        return redirect(url_for('auth.login'))
-    if homeowner == True:
-        return render_template('home.html', admitted_names=admitted_names_list, user_names=names_list, firstName=session["firstName"], images=session["userImageURLs"], imgNames = session["justPhotoNames"])
-    else:
-        return render_template('home.html', firstName=session["firstName"], images=session["userImageURLs"], imgNames = session["justPhotoNames"])
-
-
-
-
 
 
 

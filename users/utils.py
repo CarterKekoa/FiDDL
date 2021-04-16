@@ -1,7 +1,11 @@
 import linecache
 import sys
-from flask import current_app, flash, session
+from flask import Flask, current_app, flash, session
+import pyrebase
 
+import requests
+import json
+import os
 
 # Process Functions -------------------------------------------------------
 def allow_image(filename):

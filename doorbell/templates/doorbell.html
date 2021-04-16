@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block head %} <!--References blocks in base.html and will inherit the rest of the file-->
+    <title>Doorbell API Handler</title>
+{% endblock %}
+
+{% block body %} 
+    <div>
+        <h2>Images Received Will Be Displayed Below:</h2>
+        <p> IdDetermined: {{IdDetermined}}</p>
+        <p> Proba: {{proba}}</p>
+        <img src={{image}} width="400" height="400">    
+    </div>
+{% endblock %}

@@ -5,6 +5,20 @@ filelock==3.0.12
 Flask==1.1.2
 gcloud==0.17.0
 googleapis-common-protos==1.52.0
+google-api-core==1.26.1
+google-api-python-client==2.0.2
+google-auth==1.27.1
+google-auth-httplib2==0.1.0
+google-cloud-core==1.6.0
+google-cloud-firestore==2.0.2
+google-cloud-language==2.0.0
+google-cloud-pubsub==2.3.0
+google-cloud-storage==1.36.2
+google-crc32c==1.1.2
+google-resumable-media==1.2.0
+googleapis-common-protos==1.52.0
+grpc-google-iam-v1==0.12.3
+grpcio==1.36.1
 gunicorn==20.0.4
 httplib2==0.18.1
 imutils==0.5.3
@@ -14,6 +28,13 @@ joblib==0.17.0
 jws==0.1.3
 MarkupSafe==1.1.1
 numpy==1.19.4
+lazy-object-proxy==1.4.3
+libcst==0.3.17
+MarkupSafe==1.1.1
+mccabe==0.6.1
+msgpack==1.0.2
+mypy-extensions==0.4.3
+numpy==1.19.5
 oauth2client==3.0.0
 #opencv-python==4.4.0.46
 opencv-python-headless==4.2.0.32
@@ -23,15 +44,26 @@ pyasn1-modules==0.2.8
 pycryptodome==3.4.3
 Pyrebase==3.0.27
 python-jwt==2.0.1
-requests==2.11.1
+pytz==2021.1
+PyYAML==5.4.1
+requests==2.25.1
 requests-toolbelt==0.7.0
 rsa==4.6
 scikit-learn==0.23.2
 scipy==1.5.4
 six==1.15.0
 threadpoolctl==2.1.0
+<<<<<<< HEAD
 virtualenv==20.1.0
 <<<<<<< HEAD
+=======
+toml==0.10.1
+typing-extensions==3.7.4.3
+typing-inspect==0.6.0
+uritemplate==3.0.1
+urllib3==1.26.2
+virtualenv==20.2.2
+>>>>>>> master
 Werkzeug==1.0.1
 =======
 Werkzeug==1.0.1
