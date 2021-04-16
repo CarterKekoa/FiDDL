@@ -110,7 +110,7 @@ def home():
                         for uID, name in db.child("admitted_users").get().val().items():
                             if name not in admitted_names_list:
                                 db.child("admitted_users").child(uID).remove()
-                     elif request.form['input'] == 'pullNestMessagesButton':
+                    elif request.form['input'] == 'pullNestMessagesButton':
                         # TODO: Doorbell
                         print("Pull nest messages button clicked")
                         return redirect(url_for('users.nest'))

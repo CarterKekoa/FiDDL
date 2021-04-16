@@ -20,6 +20,13 @@
         </form>
     </div>
 
+<!--
+    <div></div>
+    <form action="/doorbell" method="post">
+        <button class="doorbell pullNestMessages" type="submit" name="button" value="pullNestMessagesButton">Pull Nest Messages</button>
+    </form>
+-->
+
     {% if user_names %}
         <div class="container">
             <h2>Permitted Users (Owner feature):</h2>
@@ -45,11 +52,6 @@
         </div>
         <!--Do something with the selections-->
     {% endif %}
-
-    <div></div>
-    <form action="/doorbell" method="post">
-        <button class="doorbell pullNestMessages" type="submit" name="button" value="pullNestMessagesButton">Pull Nest Messages</button>
-    </form>
 
     <div>
         <h2>Photos in {{firstName}}'s database:</h2>
