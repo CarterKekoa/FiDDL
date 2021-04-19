@@ -64,17 +64,22 @@ def handle_payload(payload):
             fiddl_utils.PrintException()
 
         
-        # TODO: If the userIdDetermined is the person registered to the home, unlock the door
-        # if userIdDetermined.lower() == session['localId'].lower():
-        #     current_app.logger.info("[UPLOAD-IMAGE] Person recognized as logged in user")
-        #     # Unlocks the door while the user is logged in
-        #     smartlock.unlock()
-        #     current_app.logger.warning("[UPLOAD-IMAGE] Door Unlocked")
-        #     userNameDetermined = session["firstName"]
-        #     print(fiddl_utils.bcolors.OKBLUE, "                             User Recognized as: ", userNameDetermined, fiddl_utils.bcolors.ENDC)
-        # else:
-        #     current_app.logger.warning("[UPLOAD-IMAGE] Photo analyzed is not the logged in user.")
-        #     userNameDetermined = "UnKnown Person in Photo"
+    userNameDetermined = "Unknown"
+    user = db.child("users").child(userIdDetermined).get().val()
+    for val in user.values():
+        for k,v in val.items():
+            if k == "firstName":
+                for uID, name in db.child("admitted_users").get().val().items():
+                    if name == v:
+                        smartlock.unlock()
+                        current_app.logger.warning("[UPLOAD-IMAGE] Door Unlocked")
+                        userNameDetermined = name
+                        print(fiddl_utils.bcolors.OKBLUE, "                             User Recognized as: ", userNameDetermined, fiddl_utils.bcolors.ENDC)
+
+    if userNameDetermined == "Unknown":
+        current_app.logger.warning("[UPLOAD-IMAGE] Photo analyzed is not the logged in user.")
+        userNameDetermined = "UnKnown Person in Photo"
+        
     print("8")
 
 @nestBP.route('/doorbell', methods=["POST"])

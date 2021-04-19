@@ -14,10 +14,6 @@
     <div class="container">
         <h1>Home</h1>
         <h2>Welcome, {{firstName}}</h2>
-        <form class="form-addPhoto" action="/upload-image" method="POST">
-            <label for="addNewPhoto">Move to add photos page:</label>
-            <input type="submit" name="button" value="addNewPhoto">
-        </form>
     </div>
 
 <!--
@@ -57,7 +53,8 @@
         <h2>Photos in {{firstName}}'s database:</h2>
         <div>
             <form method="POST">
-                <button class="home clearphotos" type="submit" name="button" value="clearPhotosButton" method="POST">Clear Photos</button>
+                <button class="form-addPhoto" type="submit" name="button" value="addNewPhoto" action="/upload-image">Add Photo</button>
+                <button class="home clearphotos" type="submit" name="button" value="clearPhotosButton">Clear Photos</button>
             </form>
             <br>
 

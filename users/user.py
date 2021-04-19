@@ -91,11 +91,13 @@ def home():
                         current_app.logger.info("[HOME] Switching to [UPLOAD-IMAGE]----------------------------------------------------------------------------------")
                         return redirect(url_for('users.upload_image'))
                     elif request.form['button'] == 'clearPhotosButton':
-                        ## Can't figure out how to clear photos from storage, database works
-                        #for Pid, name in db.child("users").child(session['localId']).child("photos").get().val().items():
-                            #print("name: ", name)
-                            #storage.child("images/" + session['localId'] + "/").delete(name)
+                        for Pid, name in db.child("users").child(session['localId']).child("photos").get().val().items():
+                            delete_image_path = "images/" + session['localId'] + "/" + name
+                            print("path name: ", delete_image_path)
+                            blob = bucket.blob(delete_image_path)
+                            blob.delete()
                         db.child("users").child(session['localId']).child("photos").remove()
+                        session['userPhotoNames'] = {}
                         session["userImageURLs"] = []
                         session["justPhotoNames"] = []
                     elif request.form['button'] == 'submitPersonsButton':
@@ -110,10 +112,10 @@ def home():
                         for uID, name in db.child("admitted_users").get().val().items():
                             if name not in admitted_names_list:
                                 db.child("admitted_users").child(uID).remove()
-                    elif request.form['input'] == 'pullNestMessagesButton':
+                    #elif request.form['input'] == 'pullNestMessagesButton':
                         # TODO: Doorbell
-                        print("Pull nest messages button clicked")
-                        return redirect(url_for('users.nest'))
+                        #print("Pull nest messages button clicked")
+                        #return redirect(url_for('users.nest'))
                     elif request.form['button'] == 'logoutButton':
                         #Logout Button
                         current_app.logger.info("[HOME] Loggin Out, switching to [LOGOUT]----------------------------------------------------------------------------------")
@@ -232,14 +234,19 @@ def upload_image():
                             print(fiddl_utils.bcolors.OKBLUE, "                             User recognized (userIdDetermined): ", userIdDetermined, fiddl_utils.bcolors.ENDC)
                             print(fiddl_utils.bcolors.OKBLUE, "                             Confidence (probability): ", proba, fiddl_utils.bcolors.ENDC)
                             
-                            if userIdDetermined.lower() == session['localId'].lower():
-                                current_app.logger.info("[UPLOAD-IMAGE] Person recognized as logged in user")
-                                # Unlocks the door while the user is logged in
-                                smartlock.unlock()
-                                current_app.logger.warning("[UPLOAD-IMAGE] Door Unlocked")
-                                userNameDetermined = session["firstName"]
-                                print(fiddl_utils.bcolors.OKBLUE, "                             User Recognized as: ", userNameDetermined, fiddl_utils.bcolors.ENDC)
-                            else:
+                            userNameDetermined = "Unknown"
+                            user = db.child("users").child(userIdDetermined).get().val()
+                            for val in user.values():
+                                for k,v in val.items():
+                                    if k == "firstName":
+                                        for uID, name in db.child("admitted_users").get().val().items():
+                                            if name == v:
+                                                smartlock.unlock()
+                                                current_app.logger.warning("[UPLOAD-IMAGE] Door Unlocked")
+                                                userNameDetermined = name
+                                                print(fiddl_utils.bcolors.OKBLUE, "                             User Recognized as: ", userNameDetermined, fiddl_utils.bcolors.ENDC)
+
+                            if userNameDetermined == "Unknown":
                                 current_app.logger.warning("[UPLOAD-IMAGE] Photo analyzed is not the logged in user.")
                                 userNameDetermined = "UnKnown Person in Photo"
                             
@@ -265,6 +272,29 @@ def upload_image():
                                 db.child("users").child(session['localId']).child("photos").push(filename)
                                 current_app.logger.info("[UPLOAD-IMAGE] Photo filename stored.")
 
+                                photo_names_in_db = {}  # will be popluated with all of the users uploaded photo names
+                                images = []             # will store the urls of the users photos
+                                image_names = []
+                                user = db.child("users").child(session['localId']).get().val()
+
+                                for val in user.values():
+                                    #Grab logining in users name from database. Not necessary here
+                                    for k,v in val.items():
+                                        #print(k,v)
+                                        if k[0] == '-':
+                                            photo_names_in_db[k] = v
+                                            image_names.append(v)
+                                            imageURL = storage.child("images/" + session['localId'] + "/" + v).get_url(None)      # URL for Google Storage Photo location
+                                            images.append(imageURL)                 # Stores the URL of each photo for the user
+                                        else:
+                                            session[k] = v
+                                            print(fiddl_utils.bcolors.OKBLUE, "                             session[", k, "]:", session[k], fiddl_utils.bcolors.ENDC)
+                                    
+                                session['userPhotoNames'] = photo_names_in_db        # session['userPhotoNames'] has the id of each photo paired with the actual photo file name
+                                print(fiddl_utils.bcolors.OKBLUE, "                             session['userPhotoNames']: ", session['userPhotoNames'], fiddl_utils.bcolors.ENDC)
+                                session["userImageURLs"] = images
+                                session["justPhotoNames"] = image_names
+
                     return redirect(request.url)
                 elif request.form['button'] == 'logoutButton':
                     #Logout Button
@@ -273,7 +303,10 @@ def upload_image():
                 elif request.form['button'] == 'backHomeButton':
                     #Home Button
                     current_app.logger.info("[UPLOAD-IMAGE] Switching to [HOME]----------------------------------------------------------------------------------")
-                    return redirect(url_for('users.home'))
+                    if homeowner == True:
+                        return render_template('home.html', admitted_names=admitted_names_list, user_names=names_list, firstName=session["firstName"], images=session["userImageURLs"], imgNames = session["justPhotoNames"])
+                    else:
+                        return render_template('home.html', firstName=session["firstName"], images=session["userImageURLs"], imgNames = session["justPhotoNames"])
             except:
                 # Upload Image Fail
                 current_app.logger.warning("[ERROR - UPLOAD-IMAGE] Error Occured: ")
