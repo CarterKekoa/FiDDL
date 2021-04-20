@@ -4,6 +4,7 @@ import requests
 import json
 import os
 import base64
+import smartlock
 
 # Helper File Imports
 import doorbell.utils as utils
