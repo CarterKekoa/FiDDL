@@ -69,8 +69,11 @@ def handle_payload(payload):
                     print("k: ", k)
                     print("v: ", v)
                     if k == "firstName":
+                        print("in if")
                         for uID, name in db.child("admitted_users").get().val().items():
-                            if name == v:
+                            print("uID: ", uID)
+                            print("name: ", name)
+                            if name.lower() == v.lower():
                                 smartlock.unlock()
                                 current_app.logger.warning("[UPLOAD-IMAGE] Door Unlocked")
                                 userNameDetermined = name
