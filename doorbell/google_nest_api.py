@@ -59,28 +59,27 @@ def handle_payload(payload):
             current_app.logger.info("[UPLOAD-IMAGE] Photo saved and Analyzed by FR")
             # Returning any 2xx status indicates successful receipt of the message.
             render_template('doorbell.html', image=imageURL, IdDetermined=userIdDetermined, proba=proba)
+
+            userNameDetermined = "Unknown"
+            user = db.child("users").child(userIdDetermined).get().val()
+            for val in user.values():
+                for k,v in val.items():
+                    if k == "firstName":
+                        for uID, name in db.child("admitted_users").get().val().items():
+                            if name == v:
+                                smartlock.unlock()
+                                current_app.logger.warning("[UPLOAD-IMAGE] Door Unlocked")
+                                userNameDetermined = name
+                                print(fiddl_utils.bcolors.OKBLUE, "                             User Recognized as: ", userNameDetermined, fiddl_utils.bcolors.ENDC)
+
+            if userNameDetermined == "Unknown":
+                current_app.logger.warning("[UPLOAD-IMAGE] Photo analyzed is not the logged in user.")
+                userNameDetermined = "UnKnown Person in Photo"
         except:
             # Analyze Fail
             current_app.logger.warning("[ERROR - DOORBELL] Error Occured: ")
             fiddl_utils.PrintException()
 
-        
-    userNameDetermined = "Unknown"
-    user = db.child("users").child(userIdDetermined).get().val()
-    for val in user.values():
-        for k,v in val.items():
-            if k == "firstName":
-                for uID, name in db.child("admitted_users").get().val().items():
-                    if name == v:
-                        smartlock.unlock()
-                        current_app.logger.warning("[UPLOAD-IMAGE] Door Unlocked")
-                        userNameDetermined = name
-                        print(fiddl_utils.bcolors.OKBLUE, "                             User Recognized as: ", userNameDetermined, fiddl_utils.bcolors.ENDC)
-
-    if userNameDetermined == "Unknown":
-        current_app.logger.warning("[UPLOAD-IMAGE] Photo analyzed is not the logged in user.")
-        userNameDetermined = "UnKnown Person in Photo"
-        
     print("8")
 
 @nestBP.route('/doorbell', methods=["POST"])
