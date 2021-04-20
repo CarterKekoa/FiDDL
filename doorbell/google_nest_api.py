@@ -62,8 +62,12 @@ def handle_payload(payload):
 
             userNameDetermined = "Unknown"
             user = db.child("users").child(userIdDetermined).get().val()
+            print("user: ", user)
             for val in user.values():
+                print("val: ", val)
                 for k,v in val.items():
+                    print("k: ", k)
+                    print("v: ", v)
                     if k == "firstName":
                         for uID, name in db.child("admitted_users").get().val().items():
                             if name == v:
@@ -73,7 +77,7 @@ def handle_payload(payload):
                                 print(fiddl_utils.bcolors.OKBLUE, "                             User Recognized as: ", userNameDetermined, fiddl_utils.bcolors.ENDC)
 
             if userNameDetermined == "Unknown":
-                current_app.logger.warning("[UPLOAD-IMAGE] Photo analyzed is not the logged in user.")
+                current_app.logger.warning("[UPLOAD-IMAGE] Person is unknown.")
                 userNameDetermined = "UnKnown Person in Photo"
         except:
             # Analyze Fail
