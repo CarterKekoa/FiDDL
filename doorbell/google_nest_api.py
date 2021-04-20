@@ -24,6 +24,8 @@ def handle_payload(payload):
     event_info = []
     event_info = utils.callback(payload)
     print("6")
+    firebase, auth, db, storage, bucket = fiddl_utils.initialize_data()
+
     
     if(event_info):
         print("7")
@@ -31,7 +33,6 @@ def handle_payload(payload):
         event_token = event_info[1]
         headers = event_info[2]
         event_id = event_info[3]
-        firebase, auth, db, storage, bucket = fiddl_utils.initialize_data()
         current_app.logger.info("[DOORBELL] Storing Event Image in Database")
         
         response = requests.get(image_url, headers=headers, stream=True)

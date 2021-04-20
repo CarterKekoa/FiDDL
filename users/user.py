@@ -9,6 +9,7 @@ import base64
 
 # Helper File Imports
 import users.utils as utils
+import general.utils as gen_utils
 import fiddl_utils as fiddl_utils
 
 # Facial Recognition File Imports
@@ -112,6 +113,19 @@ def home():
                         for uID, name in db.child("admitted_users").get().val().items():
                             if name not in admitted_names_list:
                                 db.child("admitted_users").child(uID).remove()
+                    elif request.form['button'] == 'trainButton':
+                        current_app.logger.info("[WELCOME] Training FR Models based on current users and photos available...")
+                        try:
+                            current_app.logger.info("[WELCOME] Training Models...")
+                            temp_all_users_dict = gen_utils.all_users()
+                            extract_embeddings.create_embeddings(temp_all_users_dict)
+                            train_model.train()
+                            current_app.logger.info("[WELCOME] Models Trained")
+                            modelsTrained = "New Facial Recognition models succesfully computed. Any new users and images are now included."
+                            flash(modelsTrained, "info")                    #"info" is the type of message for more customization if we want, others are warning, info, error
+                        except:
+                            current_app.logger.info("[ERROR - HOME] Error Occured...")
+                            fiddl_utils.PrintException()
                     #elif request.form['input'] == 'pullNestMessagesButton':
                         # TODO: Doorbell
                         #print("Pull nest messages button clicked")
@@ -210,7 +224,8 @@ def upload_image():
                                 storage.child("images/temp/" + filename).put(image, userIdToken)
                                 current_app.logger.info("[UPLOAD-IMAGE] Photo saved, grabbing url")
                                 imageURL = storage.child("images/temp/" + filename).get_url(None)
-                                
+                                print("image URL: ", imageURL)
+
                                 anazlyzeInfo = recognize.facialRecognition(imageURL)
 
                                 delete_temp_image_path = "images/temp/" + filename
@@ -234,21 +249,11 @@ def upload_image():
                             print(fiddl_utils.bcolors.OKBLUE, "                             User recognized (userIdDetermined): ", userIdDetermined, fiddl_utils.bcolors.ENDC)
                             print(fiddl_utils.bcolors.OKBLUE, "                             Confidence (probability): ", proba, fiddl_utils.bcolors.ENDC)
                             
-                            userNameDetermined = "Unknown"
                             user = db.child("users").child(userIdDetermined).get().val()
                             for val in user.values():
                                 for k,v in val.items():
                                     if k == "firstName":
-                                        for uID, name in db.child("admitted_users").get().val().items():
-                                            if name == v:
-                                                smartlock.unlock()
-                                                current_app.logger.warning("[UPLOAD-IMAGE] Door Unlocked")
-                                                userNameDetermined = name
-                                                print(fiddl_utils.bcolors.OKBLUE, "                             User Recognized as: ", userNameDetermined, fiddl_utils.bcolors.ENDC)
-
-                            if userNameDetermined == "Unknown":
-                                current_app.logger.warning("[UPLOAD-IMAGE] Photo analyzed is not the logged in user.")
-                                userNameDetermined = "UnKnown Person in Photo"
+                                        userNameDetermined = v
                             
                             return render_template("upload_image.html", name=userNameDetermined, proba=proba)
                         else:

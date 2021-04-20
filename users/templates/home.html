@@ -16,12 +16,15 @@
         <h2>Welcome, {{firstName}}</h2>
     </div>
 
-<!--
-    <div></div>
-    <form action="/doorbell" method="post">
-        <button class="doorbell pullNestMessages" type="submit" name="button" value="pullNestMessagesButton">Pull Nest Messages</button>
-    </form>
--->
+    {% with messages = get_flashed_messages() %}
+        <!--Check if there are any messages-->
+        {% if messages %}
+            <!--Loop through the messages-->
+            {% for msg in messages %}
+                <p style="background-color:burlywood;">{{msg}}</p>
+            {% endfor%}
+        {% endif %}
+    {% endwith %}
 
     {% if user_names %}
         <div class="container">
@@ -55,6 +58,7 @@
             <form method="POST">
                 <button class="form-addPhoto" type="submit" name="button" value="addNewPhoto" action="/upload-image">Add Photo</button>
                 <button class="home clearphotos" type="submit" name="button" value="clearPhotosButton">Clear Photos</button>
+                <button class="home train" type="submit" name="button" value="trainButton">Train Model</button>
             </form>
             <br>
 

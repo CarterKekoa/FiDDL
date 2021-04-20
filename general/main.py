@@ -23,29 +23,5 @@ def welcome():
             return redirect(url_for('auth.login'))
         elif request.form['button'] == 'registerScreen':
             return redirect(url_for('auth.register'))
-        elif request.form['button'] == 'trainButton':
-            current_app.logger.info("[WELCOME] Training FR Models based on current users and photos available...")
-            try:
-                current_app.logger.info("[WELCOME] Training Models...")
-                temp_all_users_dict = utils.all_users()
-                extract_embeddings.create_embeddings(temp_all_users_dict)
-                train_model.train()
-                current_app.logger.info("[WELCOME] Models Trained")
-                modelsTrained = "New Facial Recognition models succesfully computed. Any new users and images are now included."
-                flash(modelsTrained, "info")                    #"info" is the type of message for more customization if we want, others are warning, info, error
-            except:
-                current_app.logger.info("[ERROR - WELCOME] Error Occured...")
-                fiddl_utils.PrintException()
-            return redirect(url_for('general.welcome'))
-        elif request.form['button'] == 'frButton':
-            current_app.logger.info("[WELCOME] Running webcame facial recognition...")
-            try:
-                current_app.logger.info("[WELCOME] Activating Webcam...")
-                #recognize_video.facial_recognition_video()
-                current_app.logger.info("[WELCOME] Webcam activated")
-            except:
-                current_app.logger.info("[ERROR - WELCOME] Error Occured...")
-                fiddl_utils.PrintException()
-            return redirect(url_for('general.welcome'))
     elif request.method == "GET":
         return render_template('welcome.html')                    #must be in directory (folder) names templates, grabs file form there
