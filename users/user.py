@@ -37,7 +37,7 @@ def home():
 
         #Grab users name
         user = db.child("users").child(session['localId']).get().val()
-        if session["firstName"] == "kevin":
+        if session["firstName"].lower() == "kevin":
             homeowner = True
 
         #Parse the returned OrderedDict of data
