@@ -184,7 +184,7 @@ def register():
                     current_app.logger.info("[REGISTER] User register info stored in firebase")
 
                     # Put user's name is username list
-                    db.child("user_names").push(firstName)
+                    db.child("user_names").push(firstName.capitalize())
 
                     # Go to Home Page for New User
                     current_app.logger.info("[REGISTER] Registration Process Ended Successfully, Moving to [HOME]----------------------------------------------------------------------------------")
