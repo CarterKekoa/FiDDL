@@ -44,7 +44,7 @@ def callback(message):
     # using 'sdm.devices.events.CameraPerson.Person' to get person events only
     if event in event_type:
         print("3.1")
-        print(fiddl_utils.bcolors.OKBLUE, "                             Event Type: ", event, fiddl_utils.bcolors.ENDC)
+        print(fiddl_utils.bcolors.OKBLUE, "                             Event Type PERSON DETECTED: ", event, fiddl_utils.bcolors.ENDC)
 
         current_app.logger.info("[DOORBELL] Person event found")
         event_id = event_type[event]['eventId']
@@ -55,7 +55,7 @@ def callback(message):
         print("4")
     elif chime in event_type:
         print("3.2")
-        print(fiddl_utils.bcolors.OKBLUE, "                             Event Type: ", chime, fiddl_utils.bcolors.ENDC)
+        print(fiddl_utils.bcolors.OKBLUE, "                             Event Type CHIME: ", chime, fiddl_utils.bcolors.ENDC)
 
         current_app.logger.info("[DOORBELL] Chime event found")
         event_id = event_type[chime]['eventId']
