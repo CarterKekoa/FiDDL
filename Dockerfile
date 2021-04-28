@@ -8,10 +8,11 @@ RUN apt-get install -y python3-opencv
 # copy all files
 ADD . /code
 
-# install requirements.txt
-RUN pip install -r /requirements.txt
-
 # telling docker where root code is
 WORKDIR /code
+
+# install requirements.txt
+RUN pip install -r requirements.txt
+
 
 ENTRYPOINT ["python", "fiddl.py"]
