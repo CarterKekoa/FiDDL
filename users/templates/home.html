@@ -3,17 +3,38 @@
 
 <!--References blocks in base.html and will inherit the rest of the file-->
     <title>Home</title>
-
-
-    <div class="container">
-        <h2>Welcome, {{firstName}}</h2>
-    </div>
-    <br> <br>
-    <hr> 
+    <br>
 
     <div class="container">
-
+      <h2> Welcome, {{firstName}}</h2>
+      <br>
+      <hr> 
       
+      {% if user_names %}
+        <div class="container">
+          <h2>Permitted Users (Owner feature):</h2>
+          <p>Select who is allowed entry:</p>
+
+          <form method="POST">
+            {% for name in user_names %}
+              {% if name in admitted_names %}
+                <div>
+                  <input type="checkbox" id={{name}} name=persons value={{name}} checked>
+                  <label for={{name}}>{{name}}</label>
+                </div>
+              {% else %}
+              <div>
+                <input type="checkbox" id={{name}} name=persons value={{name}}>
+                <label for={{name}}>{{name}}</label>
+              </div>
+              {% endif %}
+            {% endfor %}
+            <br>
+            <button class="btn btn-sm btn-primary btn-block" type="submit" name="button" value="submitPersonsButton" method="POST">Submit</button>
+          </form>
+        </div>
+        <!--Do something with the selections-->
+      {% endif %}
 
       <h1 class="font-weight-light text-center text-lg-left mt-4 mb-0">Image Gallery</h1>
     

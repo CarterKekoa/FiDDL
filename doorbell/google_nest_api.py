@@ -43,37 +43,40 @@ def handle_payload(payload):
             current_app.logger.info("[DOORBELL] Analyzing Person in Photo")
             anazlyzeInfo = recognize.facialRecognition(imageURL)
             print(fiddl_utils.bcolors.OKBLUE, "                             FR analyzed info: ", anazlyzeInfo, fiddl_utils.bcolors.ENDC)
-        
-            # TODO: Delete these photos once analyzed
-            # delete_temp_image_path = "images/nestDoorbell/" + event_id
-            # blob = bucket.blob(delete_temp_image_path)
-            # print(fiddl_utils.bcolors.OKBLUE, "                             Image Blob being deleted: ", blob, fiddl_utils.bcolors.ENDC)
-            # blob.delete()
-            current_app.logger.info("[UPLOAD-IMAGE] Photo Analyzed (not currently deleting from temporary storage)")
-            userIdDetermined = anazlyzeInfo[0]
-            proba = anazlyzeInfo[1]
-            print(fiddl_utils.bcolors.OKBLUE, "                             User recognized (userIdDetermined): ", userIdDetermined, fiddl_utils.bcolors.ENDC)
-            print(fiddl_utils.bcolors.OKBLUE, "                             Confidence (probability): ", proba, fiddl_utils.bcolors.ENDC)
-            current_app.logger.info("[UPLOAD-IMAGE] Photo saved and Analyzed by FR")
-            # Returning any 2xx status indicates successful receipt of the message.
-            render_template('doorbell.html', image=imageURL, IdDetermined=userIdDetermined, proba=proba)
+            if(anazlyzeInfo):
+                # TODO: Delete these photos once analyzed
+                # delete_temp_image_path = "images/nestDoorbell/" + event_id
+                # blob = bucket.blob(delete_temp_image_path)
+                # print(fiddl_utils.bcolors.OKBLUE, "                             Image Blob being deleted: ", blob, fiddl_utils.bcolors.ENDC)
+                # blob.delete()
+                current_app.logger.info("[UPLOAD-IMAGE] Photo Analyzed (not currently deleting from temporary storage)")
+                userIdDetermined = anazlyzeInfo[0]
+                proba = anazlyzeInfo[1]
+                print(fiddl_utils.bcolors.OKBLUE, "                             User recognized (userIdDetermined): ", userIdDetermined, fiddl_utils.bcolors.ENDC)
+                print(fiddl_utils.bcolors.OKBLUE, "                             Confidence (probability): ", proba, fiddl_utils.bcolors.ENDC)
+                current_app.logger.info("[UPLOAD-IMAGE] Photo saved and Analyzed by FR")
+                # Returning any 2xx status indicates successful receipt of the message.
+                render_template('doorbell.html', image=imageURL, IdDetermined=userIdDetermined, proba=proba)
 
-            userNameDetermined = "Unknown"
-            user = db.child("users").child(userIdDetermined).get().val()
-            for val in user.values():
-                for k,v in val.items():
-                    if k == "firstName":
-                        for uID, name in db.child("admitted_users").get().val().items():
-                            if name.lower() == v.lower():
-                                if proba > 50:
-                                    smartlock.unlock()
-                                    current_app.logger.warning("[UPLOAD-IMAGE] Door Unlocked")
-                                    userNameDetermined = name
-                                    print(fiddl_utils.bcolors.OKBLUE, "                             User Recognized as: ", userNameDetermined, fiddl_utils.bcolors.ENDC)
+                userNameDetermined = "Unknown"
+                user = db.child("users").child(userIdDetermined).get().val()
+                for val in user.values():
+                    for k,v in val.items():
+                        if k == "firstName":
+                            for uID, name in db.child("admitted_users").get().val().items():
+                                if name.lower() == v.lower():
+                                    if proba > 50:
+                                        smartlock.unlock()
+                                        current_app.logger.warning("[UPLOAD-IMAGE] Door Unlocked")
+                                        userNameDetermined = name
+                                        print(fiddl_utils.bcolors.OKBLUE, "                             User Recognized as: ", userNameDetermined, fiddl_utils.bcolors.ENDC)
 
-            if userNameDetermined == "Unknown":
-                current_app.logger.warning("[UPLOAD-IMAGE] Person is unknown.")
-                userNameDetermined = "UnKnown Person in Photo"
+                if userNameDetermined == "Unknown":
+                    current_app.logger.warning("[UPLOAD-IMAGE] Person is unknown.")
+                    userNameDetermined = "UnKnown Person in Photo"
+            else:
+                print(fiddl_utils.bcolors.WARNING, "                             Bad photo from Google Nest Doorbell", fiddl_utils.bcolors.ENDC)
+
         except:
             # Analyze Fail
             current_app.logger.warning("[ERROR - DOORBELL] Error Occured: ")
