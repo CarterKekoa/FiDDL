@@ -13,6 +13,7 @@ WORKDIR /code
 
 # install requirements.txt
 RUN pip install -r requirements.txt
+RUN pip install --ignore-installed PyYAML
 
 
 ENTRYPOINT ["python", "fiddl.py"]
