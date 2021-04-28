@@ -1,41 +1,55 @@
-{% extends 'base.html' %}
+{% extends "base.html"%}
+{%block content%}
 
-{% block head %}                    <!--References blocks in base.html and will inherit the rest of the file-->
-<title>Login</title>
-{% endblock %}
+    <br> 
+    <div class="jumbotron jumbotron-fluid">
+        <div class="container">
+          <h1 class="display-4">Welcome to Fiddl</h1>
+          <p class="lead">Please select one of the following</p>
+          <br> <br> 
+        </div>
+      </div>
 
-{% block body %} 
-    <form action="/register" method="post">
-        <label>Nav Bar</label>
-        <button class="nav-bar register" type="submit" name="button" value="registerScreen">Register</button>
-    </form>
-    <div class="container">
-    
+          
     {% with messages = get_flashed_messages() %}
-        <!--Check if there are any messages-->
-        {% if messages %}
-            <!--Loop through the messages-->
-            {% for msg in messages %}
-                <p style="background-color:burlywood;">{{msg}}</p>
-            {% endfor%}
+    <!--Check if there are any messages-->
+    {% if messages %}
+        <!--Loop through the messages-->
+        {% for msg in messages %}
+            <p style="background-color:burlywood;">{{msg}}</p>
+        {% endfor%}
         {% endif %}
     {% endwith %}
 
-    <h1>Login</h1>
+    <div class="container">
 
-    <form class="form-signin" method="POST">
-        <h2>Please Sign In</h2>
-        <label for="inputEmail">Email Address</label>
-        <input type="email" id="inputEmail" name="email" class="form-control" maxlength="40" placeholder="Email address" required autofocus>
-        <label for="inputPassword">Password</label>
-        <input type="password" id="inputPassword" name="password" class="form-control" maxlength="40" placeholder="Password" required>
-        <div class="checkbox">
-            <label>
-                <input type="checkbox" value="remember-me">Remember me
-            </label>
-        </div>
-        <button class="btn btn-lg btn-primary btn-block" type="submit" name="button" value="login">submit</button>
-    </form>
+        <form method="POST">
 
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="basic-addon1">@</span>
+                <input type="text" class="form-control" placeholder="Email" id="inputEmail" name="email" aria-label="Username" aria-describedby="basic-addon1">
+              </div>
+              
+              <br> 
+    
+              <div class="input-group mb-3">
+                <span class="input-group-text" id="basic-addon1">@</span>
+                <input type="password" class="form-control" placeholder="Password" id="inputPassword" name="password" aria-label="Password" aria-describedby="basic-addon1">
+              </div>
+    
+              <div class="input-group mb-3">
+                <div class="input-group-text">
+                  <input class="form-check-input mt-0"  type="checkbox" value="remember-me" aria-label="Checkbox for following text input">
+                </div>
+                <input type="text"  readonly class="form-control" aria-label="Text input with checkbox" placeholder="Remember me">
+              </div>
+    
+            <hr> 
+              <button type="submit" class="btn btn-primary btn-lg" name="button" value="login">Login</button>
+        
+        </form>
+        
+         
     </div>
-{% endblock %}
+   
+  {%endblock content%}
