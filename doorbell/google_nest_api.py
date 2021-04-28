@@ -21,15 +21,12 @@ PROBA = None
 
 def handle_payload(payload):
     current_app.logger.info("[DOORBELL] Payload received, Passing to Google Nest API functions")
-    print("1")
     event_info = []
     event_info = utils.callback(payload)
-    print("6")
     firebase, auth, db, storage, bucket = fiddl_utils.initialize_data()
 
     
     if(event_info):
-        print("7")
         image_url = event_info[0]
         event_token = event_info[1]
         headers = event_info[2]
@@ -82,8 +79,6 @@ def handle_payload(payload):
             current_app.logger.warning("[ERROR - DOORBELL] Error Occured: ")
             fiddl_utils.PrintException()
 
-    print("8")
-
 @nestBP.route('/doorbell', methods=["POST"])
 def recieve_message_handler():
     print()
@@ -94,11 +89,9 @@ def recieve_message_handler():
     print(fiddl_utils.bcolors.OKGREEN, "                             [Nest Doorbell] \n JSON Envelope: ", envelope, fiddl_utils.bcolors.ENDC)
     payload = base64.b64decode(envelope['message']['data'])
     print(fiddl_utils.bcolors.OKGREEN, "                             JSON Payload: ", payload, fiddl_utils.bcolors.ENDC)
-    print("0")
+
     handle_payload(payload)
-    print("0.1")
     current_app.logger.info("[DOORBELL] Acknowledging Message")
-    print("0.2")
     return 'OK', 200
 
 @nestBP.route('/doorbell/image', methods=["GET",  "POST"])
