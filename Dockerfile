@@ -13,9 +13,6 @@ ADD . /code
 WORKDIR /code
 
 # install requirements.txt packages
-RUN pip install pyqtwebengine==5.13
-RUN pip install pyqt5==5.13
-
 ENV VIRTUAL_ENV=/opt/venv
 RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
