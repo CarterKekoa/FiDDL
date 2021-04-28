@@ -41,6 +41,7 @@ def handle_payload(payload):
         storage.child("images/nestDoorbell/" + event_id).put(response.content)
         imageURL = storage.child("images/nestDoorbell/" + event_id).get_url(None)
         current_app.logger.info("[DOORBELL] Image Saved to Database Succesfully")
+        print()
         print(fiddl_utils.bcolors.OKBLUE, "                             Database Image URL: ", imageURL, fiddl_utils.bcolors.ENDC)
 
         try:
@@ -86,6 +87,9 @@ def handle_payload(payload):
             # Analyze Fail
             current_app.logger.warning("[ERROR - DOORBELL] Error Occured: ")
             fiddl_utils.PrintException()
+            print(fiddl_utils.bcolors.WARNING, "                             Most Likely Bad Photo, ring doorbell to try again.", fiddl_utils.bcolors.ENDC)
+            return None
+
     else:
         print(fiddl_utils.bcolors.OKBLUE, "                             Unwanted Event, just acknoweledge message. ", fiddl_utils.bcolors.ENDC)
         return None

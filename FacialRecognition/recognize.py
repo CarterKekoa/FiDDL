@@ -14,29 +14,19 @@ import cv2			#pip3 install opencv-python	#pip3 install scikit-learn==0.23.2
 import os
 import urllib.request
 
-# Colors for colored terminal prints
-class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+import fiddl_utils as fiddl_utils
 
 def facialRecognition(imagePath):
 	# load our serialized face detector from disk
 	print()
-	print(bcolors.OKCYAN, "[RECOGNIZE] loading face detector... ", bcolors.ENDC)
+	print(fiddl_utils.OKCYAN, "[RECOGNIZE] loading face detector... ", fiddl_utils.ENDC)
 	protoPath = os.path.sep.join(["face_detection_model", "deploy.prototxt"])
 	modelPath = os.path.sep.join(["face_detection_model",
 		"res10_300x300_ssd_iter_140000.caffemodel"])
 	detector = cv2.dnn.readNetFromCaffe(protoPath, modelPath)
 
 	# load our serialized face embedding model from disk
-	print(bcolors.OKCYAN, "[RECOGNIZE] loading face recognizer... ", bcolors.ENDC)
+	print(fiddl_utils.OKCYAN, "[RECOGNIZE] loading face recognizer... ", fiddl_utils.ENDC)
 	embedder = cv2.dnn.readNetFromTorch("openface_nn4.small2.v1.t7")
 
 	# load the actual face recognition model along with the label encoder
@@ -48,7 +38,7 @@ def facialRecognition(imagePath):
 	#image = cv2.imread(imagePath)
 
 	#TODO: Image can now be read when a url image
-	print(bcolors.OKCYAN, "[RECOGNIZE] loading image... ", bcolors.ENDC)
+	print(fiddl_utils.OKCYAN, "[RECOGNIZE] loading image... ", fiddl_utils.ENDC)
 	resp = urllib.request.urlopen(imagePath)	# open the url
 	image = np.asarray(bytearray(resp.read()), dtype="uint8") # turn into bytearray image
 	image = cv2.imdecode(image, cv2.IMREAD_COLOR) # decode the byte arrays colors into an image that can be used
@@ -76,7 +66,7 @@ def facialRecognition(imagePath):
 
 		# filter out weak detections
 		if confidence > 0.5:
-			print(bcolors.OKCYAN, "[RECOGNIZE] Person Detected ", bcolors.ENDC)
+			print(fiddl_utils.OKCYAN, "[RECOGNIZE] Person Detected ", fiddl_utils.ENDC)
 			# compute the (x, y)-coordinates of the bounding box for the
 			# face
 			box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
@@ -119,9 +109,9 @@ def facialRecognition(imagePath):
 			cv2.putText(image, text, (startX, y),
 				cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
 			
-			print(bcolors.OKCYAN, "[RECOGNIZE] Person Recognized ", bcolors.ENDC)
+			print(fiddl_utils.OKCYAN, "[RECOGNIZE] Person Recognized ", fiddl_utils.ENDC)
 			info = [name, (proba * 100)]
-			print(bcolors.OKCYAN, "[RECOGNIZE] Info on recognized person: ", bcolors.ENDC)
+			print(fiddl_utils.OKCYAN, "[RECOGNIZE] Info on recognized person: ", fiddl_utils.ENDC)
 			print()
 	# show the output image
 	#cv2.imshow("Image", image)

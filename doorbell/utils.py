@@ -52,7 +52,7 @@ def callback(message):
         info = get_image(event_id) # get the image
         if(info):
             info.append(event_id)
-        print("4")
+        print("4.1")
     elif chime in event_type:
         print("3.2")
         print(fiddl_utils.bcolors.OKBLUE, "                             Event Type CHIME: ", chime, fiddl_utils.bcolors.ENDC)
@@ -63,7 +63,7 @@ def callback(message):
         info = get_image(event_id) # get the image
         if(info):
             info.append(event_id)
-        print("4")
+        print("4.2")
     else:
         print(fiddl_utils.bcolors.WARNING, "                             Don't Care Event: ", fiddl_utils.bcolors.ENDC)
         current_app.logger.info("[DOORBELL] Other event found. Skipping.")
