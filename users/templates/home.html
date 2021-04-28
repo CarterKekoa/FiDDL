@@ -1,78 +1,62 @@
-{% extends 'base.html' %}
+{% extends 'loggedin.html' %}
+{%block content%}
 
-{% block head %} <!--References blocks in base.html and will inherit the rest of the file-->
+<!--References blocks in base.html and will inherit the rest of the file-->
     <title>Home</title>
-{% endblock %}
 
-{% block body %} 
-    <form action="/logout" method="POST">
-        <label>Nav Bar</label>
-        <button type="submit" name="button" value="logoutButton">Logout</button>
-
-    </form>
 
     <div class="container">
-        <h1>Home</h1>
         <h2>Welcome, {{firstName}}</h2>
     </div>
+    <br> <br>
+    <hr> 
 
-    {% with messages = get_flashed_messages() %}
-        <!--Check if there are any messages-->
-        {% if messages %}
-            <!--Loop through the messages-->
-            {% for msg in messages %}
-                <p style="background-color:burlywood;">{{msg}}</p>
-            {% endfor%}
-        {% endif %}
-    {% endwith %}
+    <div class="container">
 
-    {% if user_names %}
-        <div class="container">
-            <h2>Permitted Users (Owner feature):</h2>
-            <p>Select who is allowed entry:</p>
+      
 
-            <form method="POST">
-                {% for name in user_names %}
-                    {% if name in admitted_names %}
-                        <div>
-                            <input type="checkbox" id={{name}} name=persons value={{name}} checked>
-                            <label for={{name}}>{{name}}</label>
-                        </div>
-                    {% else %}
-                    <div>
-                        <input type="checkbox" id={{name}} name=persons value={{name}}>
-                        <label for={{name}}>{{name}}</label>
-                    </div>
-                    {% endif %}
-                {% endfor %}
-                <br>
-                <button class="home submitPersons" type="submit" name="button" value="submitPersonsButton" method="POST">Submit</button>
-            </form>
+      <h1 class="font-weight-light text-center text-lg-left mt-4 mb-0">Image Gallery</h1>
+    
+      <hr class="mt-2 mb-5">
+    
+      <div class="row text-center text-lg-left">
+        {%for urls in images %}
+        <div class="col-lg-3 col-md-4 col-6">
+          <a href="#" class="d-block mb-4">
+                <img class="img-fluid img-thumbnail w-500 h-250" src="{{urls}}"  alt="">
+              </a>
         </div>
-        <!--Do something with the selections-->
-    {% endif %}
-
-    <div>
-        <h2>Photos in {{firstName}}'s database:</h2>
-        <div>
-            <form method="POST">
-                <button class="form-addPhoto" type="submit" name="button" value="addNewPhoto" action="/upload-image">Add Photo</button>
-                <button class="home clearphotos" type="submit" name="button" value="clearPhotosButton">Clear Photos</button>
-                <button class="home train" type="submit" name="button" value="trainButton">Train Model</button>
-            </form>
-            <br>
-
-            {% for urls in images %}
-                <!--{{urls}}-->
-                <img src={{urls}} width="200" height="200">
-                
-            {% endfor %}
-        </div>
-        <div>
-            {% for iN in imgNames %}
-                <p display=inline width="200">{{iN}}</p>
-            {% endfor %}
-        </div>
+        {%endfor%}
+     
+      </div>
+    
     </div>
 
-{% endblock %}
+
+</div>
+
+
+    <!-- 
+
+       <div class="row">
+
+        {% for urls in images%}
+
+  
+        <div class="col-lg-4 col-md-12 mb-4">
+  
+          <img src="{{urls}}" class="img-fluid mb-4" alt="">
+
+  
+        </div>
+
+        {%endfor%}
+  
+        
+      </div>
+    -->
+  
+
+  
+
+{% endblock content %}

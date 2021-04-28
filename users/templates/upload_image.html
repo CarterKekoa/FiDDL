@@ -1,18 +1,9 @@
-{% extends 'base.html' %}
-
-{% block head %}                    <!--References blocks in base.html and will inherit the rest of the file-->
+{% extends 'loggedin.html' %}
+{%block content %}
+                    <!--References blocks in base.html and will inherit the rest of the file-->
 <title>Photo Upload</title>
-{% endblock %}
 
-{% block body %} 
-    <form action="/logout" method="POST">
-        <label>Nav Bar</label>
-        <button type="submit" name="button" value="logoutButton">Logout</button>
-    </form>
-    <form action="/home" method="POST">
-        <button type="submit" name="button" value="backHomeButton">Home</button>
-    </form>
-
+    <br> <br> 
     {% with messages = get_flashed_messages() %}
         <!--Check if there are any messages-->
         {% if messages %}
@@ -44,8 +35,8 @@
                             <label class="custom-file-label" for="image" value="upload-image">Select Image to upload...</label>
                         </div>
                     </div>
-                    <br>
                     <div>
+                        <br><br> 
                         <button type="submit" class="btn btn-primary">Upload Image</button>
                         <label class="custom-file-label" for="image" value="upload-image">Upload Selected Image...</label>
                     </div>
@@ -54,6 +45,7 @@
         </div>
     </div>
 
+    <br> <br> 
     <div>
         <h2>Uploaded Image Analyzed Data:</h2>
         <p>Data will only appear if checkbox above is checked. Data is based on the Facial Recognition results of the uploaded image compared to users already stored images.</p>
@@ -68,4 +60,4 @@
         
     </div>
 
-{% endblock %}
+{% endblock content %}

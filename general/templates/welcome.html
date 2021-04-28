@@ -1,17 +1,29 @@
 {% extends 'base.html' %}
+{%block content%}
+<!--References blocks in base.html and will inherit the rest of the file-->
 
-{% block head %} <!--References blocks in base.html and will inherit the rest of the file-->
 <title>Welcome to FIDDL</title>
-{% endblock %}
 
-{% block body %} 
-<div>
-    <label>Nav Bar</label>
-    <form method="POST">
-        <button class="nav-bar login" type="submit" name="button" value="loginScreen" method="POST">Login</button>
-        <button class="nav-bar register" type="submit" name="button" value="registerScreen" method="POST">Register</button>
-    </form>
-</div>
+<br><br> 
+
+<div class="jumbotron">
+    <h1 class="display-4">Welcome To FiDDL</h1>
+    <p class="lead">What do we do?</p>
+    <hr class="my-4">
+    <p>     Our project aims to make property access more convenient for both our consumer and those that they wish to let into their homes. 
+        Losing/forgetting keys is an outdated hassle that affects over 20 million people a year in the US. Today your doorbell is not 
+        just a doorbell, it can now record and display audio and video. Your keys must reach that same standard. Our product will not 
+        only eliminate the need to remember one more thing every time you leave the house, but it would also save time and energy while 
+        providing peace of mind with another level of home security. </p>  
+    <p>     Our project involves an already created smart lock and video doorbell in addition to a web app to be developed by our team. We will 
+        allow you (a homeowner) to access our app, create a profile, and upload pictures of yourself and dependents you wish to permit entry. 
+        We will also provide users with the ability to add others from our database to their “Home” to allow them restricted access. These 
+        photos will then be cross-checked against facial recognition data gathered from the video doorbell upon arrival. Any “permitted person” 
+        will then be able to witness the door unlocking automatically in front of them. </p>
+    <p class="lead">
+      <a class="btn btn-primary btn-lg" href="#" role="button">Learn more</a>
+    </p>
+  </div>
 {% with messages = get_flashed_messages() %}
     <!--Check if there are any messages-->
     {% if messages %}
@@ -22,18 +34,6 @@
     {% endif %}
 {% endwith %}
 
-<h1>Welcome To FiDDL</h1>
-<h2>What do we do?</h2>
-<p>FiDDL stands for Face ID Door Lock</p>
-<p>     Our project aims to make property access more convenient for both our consumer and those that they wish to let into their homes. 
-    Losing/forgetting keys is an outdated hassle that affects over 20 million people a year in the US. Today your doorbell is not 
-    just a doorbell, it can now record and display audio and video. Your keys must reach that same standard. Our product will not 
-    only eliminate the need to remember one more thing every time you leave the house, but it would also save time and energy while 
-    providing peace of mind with another level of home security. </p>  
-<p>     Our project involves an already created smart lock and video doorbell in addition to a web app to be developed by our team. We will 
-    allow you (a homeowner) to access our app, create a profile, and upload pictures of yourself and dependents you wish to permit entry. 
-    We will also provide users with the ability to add others from our database to their “Home” to allow them restricted access. These 
-    photos will then be cross-checked against facial recognition data gathered from the video doorbell upon arrival. Any “permitted person” 
-    will then be able to witness the door unlocking automatically in front of them. </p>
 
-{% endblock %}
+
+{% endblock content %}

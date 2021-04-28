@@ -19,13 +19,28 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          
+            <li class="nav-item">
+              <!--   <a class="nav-link active text-light" aria-current="page" href="/upload-image">Add photos</a> -->
+              <a href="/upload-image">
+                <button class="home train" type="submit">Upload Photo</button>
+              </a> 
+            </li>
+            <li class="nav-item">
+                <form method="POST">
+                  <button class="home clearphotos" type="submit" name="button" value="clearPhotosButton">Clear Photos</button>
+                </form>
+              </li>
+            <li class="nav-item">
+              <form method="POST">
+                <button class="home train" type="submit" name="button" value="trainButton">Train Model</button>
+              </form>
+            </li>
           </ul>
           <form class="d-flex">
 
         
-            <a class="nav-link active text-light" aria-current="page" href="/login">Login</a>
-            <a class="nav-link active text-light" aria-current="page" href="/register">Register</a>
+            <a class="nav-link active text-light" aria-current="page" href="/logout">Logout</a>
+            
           </form>
         </div>
       </div>

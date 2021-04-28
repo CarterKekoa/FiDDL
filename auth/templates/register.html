@@ -1,15 +1,10 @@
 {% extends 'base.html' %}
+{%block content%}
 
-{% block head %}                    <!--References blocks in base.html and will inherit the rest of the file-->
-<title>Register</title>
-{% endblock %}
+                   <!--References blocks in base.html and will inherit the rest of the file-->
 
-{% block body %} 
-    <form action="/login" method="POST">
-        <label>Nav Bar</label>
-        <button class="nav-bar login" type="submit" name="button" value="loginScreen">Login</button>
-    </form>
 
+    <br> <br> 
     <div class="container">
         <h1>Register</h1>
 
@@ -26,7 +21,9 @@
         {% endif%}
 
         <form class="form-register" action="/register" method="POST">
+            <br> <br> 
             <h2>Please Create an Account</h2>
+            <hr> 
             <label for="inputFirstName">First Name</label>
             <input type="firstName" id="inputFirstName" name="firstName" class="form-control" maxlength="40" placeholder="First Name" required autofocus>
             <label for="inputLastName">Last Name</label>
@@ -36,9 +33,11 @@
             <label for="inputPassword">Password</label>
             <input type="password" id="inputPassword" name="password" class="form-control" maxlength="40" placeholder="Password" required>
             <label for="inputPassword">Confirm Password</label>
-            <input type="password" id="inputPasswordConfirm" name="passwordConfirm" class="form-control" maxlength="40" placeholder="Confirm Password" required>    
-            <button class="btn btn-lg btn-primary btn-block" type="submit" name="button" value="register">Submit</button>
+            <input type="password" id="inputPasswordConfirm" name="passwordConfirm" class="form-control" maxlength="40" placeholder="Confirm Password" required>  
+            
+            <br> <br> 
+            <button class="btn btn-lg btn-primary btn-block" type="submit" name="button" value="register">submit</button>
         </form>
     </div>
 
-{% endblock %}
+{% endblock content %}
