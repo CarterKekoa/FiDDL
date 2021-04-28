@@ -11,11 +11,11 @@ ADD . /code
 # telling docker where root code is
 WORKDIR /code
 
-# install requirements.txt
-RUN pip install -r requirements.txt
-RUN pip install --ignore-installed PyYAML
+# install requirements.txt packages
 RUN pip install pyqtwebengine
 RUN pip install pyqt5
+RUN pip install -r requirements.txt
+RUN pip install --ignore-installed PyYAML
 
 
 ENTRYPOINT ["python", "fiddl.py"]
