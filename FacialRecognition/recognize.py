@@ -79,12 +79,17 @@ def facialRecognition(imagePath):
 			print(bcolors.OKCYAN, "[RECOGNIZE] Person Detected ", bcolors.ENDC)
 			# compute the (x, y)-coordinates of the bounding box for the
 			# face
+			print("1")
 			box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
+			print("2")
 			(startX, startY, endX, endY) = box.astype("int")
+			print("3")
 
 			# extract the face ROI
 			face = image[startY:endY, startX:endX]
+			print("4")
 			(fH, fW) = face.shape[:2]
+			print("5")
 
 			# ensure the face width and height are sufficiently large
 			if fW < 20 or fH < 20:
@@ -93,13 +98,18 @@ def facialRecognition(imagePath):
 			# construct a blob for the face ROI, then pass the blob
 			# through our face embedding model to obtain the 128-d
 			# quantification of the face
+			print("6")
 			faceBlob = cv2.dnn.blobFromImage(face, 1.0 / 255, (96, 96),
 				(0, 0, 0), swapRB=True, crop=False)
+			print("7")
 			embedder.setInput(faceBlob)
+			print("8")
 			vec = embedder.forward()
 
 			# perform classification to recognize the face
+			print("9")
 			preds = recognizer.predict_proba(vec)[0]
+			print("10")
 			j = np.argmax(preds)
 			proba = preds[j]
 			if proba < .35:
@@ -107,15 +117,19 @@ def facialRecognition(imagePath):
 			else:
 				name = le.classes_[j]
 
+			print("11")
 			# draw the bounding box of the face along with the associated
 			# probability
 			if name == "Unknown":
 				text = "{}: {:.2f}".format(name)
 			else:
 				text = "{}: {:.2f}%".format(name, proba * 100)
+			print("12")
 			y = startY - 10 if startY - 10 > 10 else startY + 10
+			print("13")
 			cv2.rectangle(image, (startX, startY), (endX, endY),
 				(0, 0, 255), 2)
+			print("14")
 			cv2.putText(image, text, (startX, y),
 				cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
 			
