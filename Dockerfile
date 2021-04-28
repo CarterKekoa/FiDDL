@@ -1,5 +1,6 @@
 # a Dockerfile is a build spec for a Docker image
-FROM continuumio/anaconda3:2020.11
+FROM python:3.8-slim-buster
+#FROM continuumio/anaconda3:2020.11
 
 RUN apt-get update
 RUN apt-get install ffmpeg libsm6 libxext6  -y
@@ -12,10 +13,17 @@ ADD . /code
 WORKDIR /code
 
 # install requirements.txt packages
-RUN pip install pyqtwebengine
-RUN pip install pyqt5
+RUN pip install pyqtwebengine==5.13
+RUN pip install pyqt5==5.13
+
+ENV VIRTUAL_ENV=/opt/venv
+RUN python3 -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+# Install dependencies:
+COPY requirements.txt .
 RUN pip install -r requirements.txt
+
 RUN pip install --ignore-installed PyYAML
 
-
+COPY fiddl.py .
 ENTRYPOINT ["python", "fiddl.py"]
