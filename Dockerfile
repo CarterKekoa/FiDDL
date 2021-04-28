@@ -1,5 +1,9 @@
 # a Dockerfile is a build spec for a Docker image
-FROM continnumio/anaconda3:2020.11
+FROM continuumio/anaconda3:2020.11
+
+RUN apt-get update
+RUN apt-get install ffmpeg libsm6 libxext6  -y
+RUN apt-get install -y python3-opencv
 
 # copy all files
 ADD . /code
