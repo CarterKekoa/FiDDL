@@ -43,8 +43,10 @@ def callback(message):
     print("2")
     # using 'sdm.devices.events.CameraPerson.Person' to get person events only
     if event in event_type:
-        print("3")
-        current_app.logger.info("[DOORBELL] Chime event found")
+        print("3.1")
+        print(fiddl_utils.bcolors.OKBLUE, "                             Event Type: ", event, fiddl_utils.bcolors.ENDC)
+
+        current_app.logger.info("[DOORBELL] Person event found")
         event_id = event_type[event]['eventId']
         print(fiddl_utils.bcolors.OKGREEN, "                             Event Id: ", event_id, fiddl_utils.bcolors.ENDC)
         info = get_image(event_id) # get the image
@@ -52,7 +54,9 @@ def callback(message):
             info.append(event_id)
         print("4")
     elif chime in event_type:
-        print("3")
+        print("3.2")
+        print(fiddl_utils.bcolors.OKBLUE, "                             Event Type: ", chime, fiddl_utils.bcolors.ENDC)
+
         current_app.logger.info("[DOORBELL] Chime event found")
         event_id = event_type[chime]['eventId']
         print(fiddl_utils.bcolors.OKGREEN, "                             Event Id: ", event_id, fiddl_utils.bcolors.ENDC)
@@ -60,6 +64,9 @@ def callback(message):
         if(info):
             info.append(event_id)
         print("4")
+    else:
+        current_app.logger.info("[DOORBELL] Other event found. Skipping.")
+        return None
     print("5")
     # delete the message from the Google Cloud Platform queue
     #current_app.logger.info("[DOORBELL] Message Acknowledged")
