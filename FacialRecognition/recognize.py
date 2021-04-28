@@ -19,14 +19,14 @@ import fiddl_utils as fiddl_utils
 def facialRecognition(imagePath):
 	# load our serialized face detector from disk
 	print()
-	print(fiddl_utils.OKCYAN, "[RECOGNIZE] loading face detector... ", fiddl_utils.ENDC)
+	print(fiddl_utils.bcolors.OKCYAN, "[RECOGNIZE] loading face detector... ", fiddl_utils.bcolors.ENDC)
 	protoPath = os.path.sep.join(["face_detection_model", "deploy.prototxt"])
 	modelPath = os.path.sep.join(["face_detection_model",
 		"res10_300x300_ssd_iter_140000.caffemodel"])
 	detector = cv2.dnn.readNetFromCaffe(protoPath, modelPath)
 
 	# load our serialized face embedding model from disk
-	print(fiddl_utils.OKCYAN, "[RECOGNIZE] loading face recognizer... ", fiddl_utils.ENDC)
+	print(fiddl_utils.bcolors.OKCYAN, "[RECOGNIZE] loading face recognizer... ", fiddl_utils.bcolors.ENDC)
 	embedder = cv2.dnn.readNetFromTorch("openface_nn4.small2.v1.t7")
 
 	# load the actual face recognition model along with the label encoder
@@ -38,7 +38,7 @@ def facialRecognition(imagePath):
 	#image = cv2.imread(imagePath)
 
 	#TODO: Image can now be read when a url image
-	print(fiddl_utils.OKCYAN, "[RECOGNIZE] loading image... ", fiddl_utils.ENDC)
+	print(fiddl_utils.bcolors.OKCYAN, "[RECOGNIZE] loading image... ", fiddl_utils.bcolors.ENDC)
 	resp = urllib.request.urlopen(imagePath)	# open the url
 	image = np.asarray(bytearray(resp.read()), dtype="uint8") # turn into bytearray image
 	image = cv2.imdecode(image, cv2.IMREAD_COLOR) # decode the byte arrays colors into an image that can be used
@@ -66,7 +66,7 @@ def facialRecognition(imagePath):
 
 		# filter out weak detections
 		if confidence > 0.5:
-			print(fiddl_utils.OKCYAN, "[RECOGNIZE] Person Detected ", fiddl_utils.ENDC)
+			print(fiddl_utils.bcolors.OKCYAN, "[RECOGNIZE] Person Detected ", fiddl_utils.bcolors.ENDC)
 			# compute the (x, y)-coordinates of the bounding box for the
 			# face
 			box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
@@ -109,9 +109,9 @@ def facialRecognition(imagePath):
 			cv2.putText(image, text, (startX, y),
 				cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
 			
-			print(fiddl_utils.OKCYAN, "[RECOGNIZE] Person Recognized ", fiddl_utils.ENDC)
+			print(fiddl_utils.bcolors.OKCYAN, "[RECOGNIZE] Person Recognized ", fiddl_utils.bcolors.ENDC)
 			info = [name, (proba * 100)]
-			print(fiddl_utils.OKCYAN, "[RECOGNIZE] Info on recognized person: ", fiddl_utils.ENDC)
+			print(fiddl_utils.bcolors.OKCYAN, "[RECOGNIZE] Info on recognized person: ", fiddl_utils.bcolors.ENDC)
 			print()
 	# show the output image
 	#cv2.imshow("Image", image)
