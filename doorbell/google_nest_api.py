@@ -24,9 +24,12 @@ def handle_payload(payload):
     event_info = []
     event_info = utils.callback(payload)
     firebase, auth, db, storage, bucket = fiddl_utils.initialize_data()
+    print(fiddl_utils.bcolors.OKBLUE, "                             event_info: ", event_info, fiddl_utils.bcolors.ENDC)
+
 
     
     if(event_info):
+        print(fiddl_utils.bcolors.OKBLUE, "                             Good Event, Processing Image ", fiddl_utils.bcolors.ENDC)
         image_url = event_info[0]
         event_token = event_info[1]
         headers = event_info[2]
@@ -34,6 +37,7 @@ def handle_payload(payload):
         current_app.logger.info("[DOORBELL] Storing Event Image in Database")
         
         response = requests.get(image_url, headers=headers, stream=True)
+
         storage.child("images/nestDoorbell/" + event_id).put(response.content)
         imageURL = storage.child("images/nestDoorbell/" + event_id).get_url(None)
         current_app.logger.info("[DOORBELL] Image Saved to Database Succesfully")
@@ -65,7 +69,8 @@ def handle_payload(payload):
                         if k == "firstName":
                             for uID, name in db.child("admitted_users").get().val().items():
                                 if name.lower() == v.lower():
-                                    if proba > 50:
+                                    # Confidence level to unlock at
+                                    if proba > 30:
                                         smartlock.unlock()
                                         current_app.logger.warning("[UPLOAD-IMAGE] Door Unlocked")
                                         userNameDetermined = name
@@ -81,6 +86,9 @@ def handle_payload(payload):
             # Analyze Fail
             current_app.logger.warning("[ERROR - DOORBELL] Error Occured: ")
             fiddl_utils.PrintException()
+    else:
+        print(fiddl_utils.bcolors.OKBLUE, "                             Unwanted Event, just acknoweledge message. ", fiddl_utils.bcolors.ENDC)
+        return None
 
 @nestBP.route('/doorbell', methods=["POST"])
 def recieve_message_handler():

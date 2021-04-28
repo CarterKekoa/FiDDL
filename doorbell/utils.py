@@ -65,6 +65,7 @@ def callback(message):
             info.append(event_id)
         print("4")
     else:
+        print(fiddl_utils.bcolors.WARNING, "                             Don't Care Event: ", fiddl_utils.bcolors.ENDC)
         current_app.logger.info("[DOORBELL] Other event found. Skipping.")
         return None
     print("5")
