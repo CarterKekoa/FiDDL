@@ -76,9 +76,11 @@ app.config['bucket'] = bucket
 #if running from command line, turn on dev mode
 if not os.environ.get('SECRET_KEY') is None:
     app.secret_key = os.environ["SECRET_KEY"]                  # To get Heroku Envrionment Variable
+else:
+    port = os.environ.get("PORT", 5000)
 app.permanent_session_lifetime = timedelta(hours=2)            # how long permanent session will last, hours,min,days
 
 if __name__ == "__main__":      
     print("__main__")
     app.secret_key = os.urandom(24)                                # random secret key to track if user is logged in
-    app.run(debug=True)         #dev mode, server updates on own, shows errors
+    app.run(debug=True, host="0.0.0.0", port=port)         #dev mode, server updates on own, shows errors
