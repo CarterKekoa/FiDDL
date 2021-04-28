@@ -20,7 +20,7 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
-RUN pip install --ignore-installed PyYAML
+#RUN pip install --ignore-installed PyYAML
 
 COPY fiddl.py .
 ENTRYPOINT ["python", "fiddl.py"]
