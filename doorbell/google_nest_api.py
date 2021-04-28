@@ -68,10 +68,11 @@ def handle_payload(payload):
                     if k == "firstName":
                         for uID, name in db.child("admitted_users").get().val().items():
                             if name.lower() == v.lower():
-                                smartlock.unlock()
-                                current_app.logger.warning("[UPLOAD-IMAGE] Door Unlocked")
-                                userNameDetermined = name
-                                print(fiddl_utils.bcolors.OKBLUE, "                             User Recognized as: ", userNameDetermined, fiddl_utils.bcolors.ENDC)
+                                if proba > 50:
+                                    smartlock.unlock()
+                                    current_app.logger.warning("[UPLOAD-IMAGE] Door Unlocked")
+                                    userNameDetermined = name
+                                    print(fiddl_utils.bcolors.OKBLUE, "                             User Recognized as: ", userNameDetermined, fiddl_utils.bcolors.ENDC)
 
             if userNameDetermined == "Unknown":
                 current_app.logger.warning("[UPLOAD-IMAGE] Person is unknown.")
