@@ -14,6 +14,8 @@ WORKDIR /code
 # install requirements.txt
 RUN pip install -r requirements.txt
 RUN pip install --ignore-installed PyYAML
+RUN pip install pyqtwebengine
+RUN pip install pyqt5
 
 
 ENTRYPOINT ["python", "fiddl.py"]
