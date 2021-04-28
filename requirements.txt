@@ -56,7 +56,6 @@ pyparsing==2.4.7
 Pyrebase4==4.4.3
 python-jwt==2.0.1
 pytz==2021.1
-PyYAML==5.4.1
 requests==2.25.1
 requests-toolbelt==0.9.1
 rsa==4.7
